@@ -1,0 +1,381 @@
+---
+description: Pacvue 日期选择器（DatePicker）规范——触发器、面板结构、日期格子状态、四种显示模式、日期范围选择、与 Element Plus 差异 check
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 09 · 日期选择器规范（DatePicker）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN` node `1377-19146`
+
+---
+
+## 一、触发器（日期筛选 Input）
+
+```
+[ 02/13/2020 ~ 02/18/2020          ✕  📅 ]
+```
+
+```css
+width: 240px;      /* 默认宽度，随容器可变 */
+height: 36px;
+padding: 0 12px;
+border: 1px solid #DEDFE3;
+border-radius: 4px;            /* var(--radius-sm) */
+background: #FFFFFF;
+```
+
+| 部分 | 样式 |
+|---|---|
+| 日期文字（有值） | Inter Regular 14px，`#66666C` |
+| Placeholder "Start Date ~ End Date" | Inter Regular 14px，`#B2B2B8` |
+| 日历图标（Event） | `20×20px`，右侧，颜色 `#66666C` |
+| 清除图标（close-circle-fill） | `24×24px`，日历图标左侧，**有值时才显示** |
+
+**悬停/点击边框：** `1px solid var(--pcv-brand)` — 随主题色切换（同 Input 规范）
+
+---
+
+## 二、面板整体结构（266px 宽）
+
+```
+┌─────────────────────────────────────────────┐ ← border-radius: 6px
+│ Header（68px）                               │
+│  < chevron  [February]  [2020]  chevron >  │
+│  Sun  Mon  Tue  Wed  Thu  Fri  Sat          │
+├─────────────────────────────────────────────┤ ← 1px 分隔线
+│ Day Grid（每格 36×36px，7列 × 最多6行）       │
+│   26  27  28  29  30  31   1               │
+│    2   3   4   5   6   7   8               │
+│    9  10  11  12  13  14  15               │
+│   16  17  18  19  20  21  22               │
+│   23  24  25  26  27  28  29               │
+│    1   2   3   4   5   6   7               │
+├─────────────────────────────────────────────┤
+│           Today（footer 可选）               │
+└─────────────────────────────────────────────┘
+```
+
+### 面板容器
+```css
+width: 266px;
+background: #FFFFFF;
+border-radius: 6px;
+box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.08);
+```
+
+### Header 区域（68px）
+| 元素 | 样式 |
+|---|---|
+| 月份名（February） | Inter Medium 14px，`#5E5873`，居中左侧 |
+| 年份（2020） | Inter Regular 14px，`#6E6B7B`，紧跟月份右侧 |
+| 上/下月切换图标 | `chevron-left` / `chevron-right`，`18×18px`，颜色 `#6E6B7B` |
+| 星期标题（Sun Mon...） | Inter Regular 12px，`#6E6B7B`，均匀分布 |
+| 分隔线 | `1px solid` 横线，Header 与格子之间 |
+
+### Today 快捷按钮（footer）
+```css
+font: Inter Medium 14px;
+color: var(--pcv-brand);   /* #FF9F43 / #0253B6，随主题变化 */
+text-align: center;
+cursor: pointer;
+padding: 8px 0;
+```
+
+---
+
+## 三、日期格子状态（36×36px）
+
+每个格子使用圆形背景（`border-radius: 18px`）：
+
+| 状态 | 名称 | 背景 | 文字颜色 | 边框 |
+|---|---|---|---|---|
+| **Default** | 普通日期 | transparent（白色 Shape） | `#6E6B7B` | 无 |
+| **Default Hover** | 鼠标悬停 | `rgba(var(--pcv-brand-rgb), 0.15)` | `#6E6B7B` | 无 |
+| **Default Focus** | 键盘聚焦 / 范围端点悬停 | `#FFFFFF` | `#6E6B7B` | `2px solid var(--pcv-brand)`，radius: 18px |
+| **Default Today** | 今天 | `var(--pcv-brand)` **实心填充** | `#FFFFFF` | 无 |
+| **Default Disable** | 不可选日期 | transparent | `#B9B9C3` | 无，cursor: not-allowed |
+| **Selected（起/止点）** | 选中 | `var(--pcv-brand)` **实心填充** | `#FFFFFF` | 无 |
+| **In Range（区间内）** | 范围覆盖 | `rgba(var(--pcv-brand-rgb), 0.15)` | `#6E6B7B` | 无，背景延伸到格子两侧 |
+
+> 格子尺寸严格固定为 `36×36px`，7 列均等分（每列约 38px = 266 / 7）
+
+---
+
+## 四、四种显示模式
+
+### 4.1 Day 模式（默认）
+- 标准日历网格，Sun~Sat 列，逐日显示
+- 触发器格式：`MM/DD/YYYY` 或 `MM/DD/YYYY ~ MM/DD/YYYY`
+
+### 4.2 Week 模式
+- 高亮整行一周，显示以周为单位的范围
+- 触发器格式：`W01/01/2021 - W01/07/2021`
+- 表格列显示：`W12,07/06/2021`
+
+### 4.3 Month 模式
+- 3列月份网格（Jan Feb Mar / Apr May Jun...）
+- 触发器格式：`May 2021 - Mar 2022`
+- 表格列显示：`Mar-2018`
+- "All" 按钮可全选该年所有月份
+
+### 4.4 Quarter 模式
+- 下拉列表形式：Q1-2021, Q4-2020, Q3-2020...
+- 右侧有独立下拉浮层（宽度约 189px）
+- 选中行：高亮 `rgba(brand, 0.1)` 背景
+- 触发器格式：`Q1-2021`
+- 表格列显示：`Q1-2021`
+
+---
+
+## 五、日期范围选择（DateRange）
+
+### 布局
+```
+[ 触发器 左日期 ~ 右日期          ✕  📅 ]
+
+┌──────────────────┐     ┌──────────────────┐
+│   February 2020  │     │    March 2020     │
+│  Sun Mon Tue...  │     │  Sun Mon Tue...   │
+│  日历格子区域     │     │  日历格子区域      │
+└──────────────────┘     └──────────────────┘
+```
+两个面板并排，共同使用同一套格子状态规则。
+
+### 快捷日期预设面板（右侧选项列表）
+```
+Real Time
+Yesterday
+Last 7 Days
+Last 7 Days（Exclude Today 7 days）
+Last Week
+Last 2 Weeks / Last 3 Weeks / Last 4 Weeks
+Last 90 Days
+Last 30 Days（include today exclude last 5 day）← 当前选中，高亮 brand bg
+Last Month / This Month
+Last 90 Days / Last 60 Days
+Last Year
+Custom
+---
+[Cancel]    [Apply]    ← 底部操作按钮
+```
+
+**已选预设项样式：**
+```css
+background: var(--pcv-brand);
+color: #FFFFFF;
+border-radius: 4px;
+font-weight: 500;
+```
+
+**Apply 按钮：** 主按钮（brand 色填充）
+**Cancel 按钮：** 次要按钮（边框型）
+
+---
+
+## 六、表单内使用日期选择（表单 inline）
+
+适用于创建页/编辑页表单中的日期字段：
+- 遵守 Input 规范的宽度规则（最小 256px）
+- 触发器高度 36px，悬停/聚焦边框变为 brand 色
+- 标题（Label）位于触发器上方，间距 4px（s1）
+
+---
+
+## 七、与 Element Plus 差异对比
+
+| 属性 | EP 默认 | Pacvue 规范 | 状态 |
+|---|---|---|---|
+| 触发器高度 | 32px | **36px** | ✅ 已在 el-input override 覆盖 |
+| 触发器 padding | `0 15px` | **0 12px** | ✅ 已覆盖 |
+| 触发器边框（default） | `#DCDFE6` | `#DEDFE3` | ⚠️ 极近，token 映射 |
+| Hover/Focus 边框 | `--el-color-primary` | `var(--pcv-brand)` 🎨 | ⚠️ primary 已映射，自动生效 |
+| 面板 border-radius | `4px` | **6px** | ✅ 需 override |
+| 面板 box-shadow | `0 2px 12px 0 rgba(0,0,0,.1)` | **`0 10px 10px 0 rgba(0,0,0,0.08)`** | ✅ 需 override |
+| 格子尺寸 | `32px` 左右 | **36×36px** | ✅ 需确认 override |
+| 今天（today）样式 | 下划线或文字色 | **实心品牌色圆，白字** | ✅ 需 override |
+| 已选格子 | 实心 primary 圆 | **实心 brand 圆，白字** | ⚠️ primary 已映射，自动生效 |
+| 范围区间背景 | `--el-color-primary-light-9` | **`rgba(brand, 0.15)`** | ✅ 需确认 |
+| 禁用格子文字 | `#C0C4CC` | **`#B9B9C3`** | ✅ 接近 |
+| 星期标题字号 | 12px | **12px** | ✅ 匹配 |
+| 月/年标题字号 | 14px Medium | **Month: Medium 14px `#5E5873`，Year: Regular 14px `#6E6B7B`** | ✅ 需分别设置 |
+| "Today" 按钮颜色 | `--el-color-primary` | **`var(--pcv-brand)`** | ⚠️ primary 已映射，自动生效 |
+
+---
+
+## 八、CSS Override 参考（el-overrides.css）
+
+```css
+/* ===== DatePicker Panel ===== */
+.el-picker__popper .el-picker-panel {
+  border-radius: 6px;
+  box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Month & Year header */
+.el-date-picker__header-label {
+  font-size: 14px;
+  color: #5e5873;
+  font-weight: 500;
+}
+.el-date-picker__header-label + .el-date-picker__header-label {
+  color: #6e6b7b;
+  font-weight: 400;
+}
+
+/* Weekday header */
+.el-date-table th {
+  font-size: 12px;
+  color: #6e6b7b;
+  font-weight: 400;
+}
+
+/* Day cell */
+.el-date-table td .el-date-table-cell {
+  width: 36px;
+  height: 36px;
+}
+
+.el-date-table td .el-date-table-cell__text {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 18px;
+  font-size: 14px;
+  color: #6e6b7b;
+}
+
+/* Hover */
+.el-date-table td:not(.disabled):hover .el-date-table-cell__text {
+  background: rgba(var(--pcv-brand-rgb), 0.15);
+  color: #6e6b7b;
+}
+
+/* Today — filled brand circle */
+.el-date-table td.today .el-date-table-cell__text {
+  background: var(--pcv-brand);
+  color: #ffffff;
+  border-radius: 18px;
+}
+
+/* Selected */
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: var(--pcv-brand);
+  color: #ffffff;
+  border-radius: 18px;
+}
+
+/* Range in-between */
+.el-date-table td.in-range .el-date-table-cell {
+  background: rgba(var(--pcv-brand-rgb), 0.15);
+}
+
+/* Disabled */
+.el-date-table td.disabled .el-date-table-cell__text {
+  color: #b9b9c3;
+  cursor: not-allowed;
+}
+
+/* Today footer link */
+.el-picker-panel__footer .el-button--text {
+  color: var(--pcv-brand);
+  font-weight: 500;
+  font-size: 14px;
+}
+```
+
+---
+
+## 九、筛选栏内日期范围条件框特殊规则
+
+> 日期选择器放在 Filter Bar 的筛选条件格时，结构与普通 filter-cond 不同：
+
+### 9.1 视觉结构差异
+
+| 属性 | 普通筛选条件 | 日期范围条件 |
+|---|---|---|
+| 右侧图标 | `↓` 下拉箭头 | 📅 日历图标（替换箭头）|
+| 图标色 | `#DEDFE3` → hover `brand` | `#DEDFE3` → hover `brand` |
+| 清除按钮 | 无 | ✕ 出现在日历图标左侧（**有值时才显示**）|
+| 值文字 | `#66666C` | `#66666C`（空时 placeholder `#B2B2B8`）|
+| 占位文本 | "Select All" | "Start Date ~ End Date" |
+
+### 9.2 HTML 结构模板
+
+```html
+<!-- 日期范围筛选条件框 -->
+<div class="filter-cond date-cond" style="position:relative">
+  <span class="filter-cond-label">Last Updated</span>
+  <span class="filter-divider"></span>
+
+  <!-- 日期文字（placeholder / 有值） -->
+  <span class="filter-date-text">Start Date ~ End Date</span>
+
+  <!-- 清除按钮：有值时才显示（.has-value class 控制） -->
+  <span class="filter-date-clear">
+    <svg><!-- ✕ icon --></svg>
+  </span>
+
+  <!-- 日历图标：始终右侧，代替 ↓ 箭头 -->
+  <span class="filter-cal-icon">
+    <svg><!-- calendar icon --></svg>
+  </span>
+
+  <!-- 日期面板（绝对定位，点击展开） -->
+  <div class="date-picker-panel">
+    <!-- 左：快捷预设（Yesterday / Last 7 Days / Last 30 Days...） -->
+    <!-- 右：双月历 + Cancel / Apply 按钮 -->
+  </div>
+</div>
+```
+
+### 9.3 日期面板结构
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Yesterday              │  ← February 2025 →  ← March 2025 → │
+│ Last 7 Days            │  Su Mo Tu We Th Fr Sa               │
+│ ● Last 30 Days         │  日历格子（hover / in-range / 选中）   │
+│ Last Week              │                                      │
+│ Last Month             │                      [Cancel] [Apply]│
+│ ...                    │                                      │
+└──────────────────────────────────────────────────────────────┘
+左列宽约 200px，右列占余，底部 Apply 右对齐
+```
+
+- 快捷项当前选中：`background: var(--pcv-brand); color: #fff; radius: 4px`
+- 双月历：左月 + 右月（相邻），用户点击起止日形成区间
+- Apply 后将日期写入触发器，格式：`MM/DD/YYYY ~ MM/DD/YYYY`
+
+### 9.4 CSS 核心规则
+
+```css
+/* 日历图标色（默认 #DEDFE3，hover/active 变品牌色）*/
+.filter-cal-icon { color: #dedfe3; }
+.filter-cond.date-cond:hover .filter-cal-icon,
+.filter-cond.date-cond.active .filter-cal-icon { color: var(--pcv-brand); }
+
+/* 清除按钮：有值时显示 */
+.filter-date-clear { display: none; }
+.filter-cond.has-value .filter-date-clear { display: flex; }
+
+/* 日期面板 */
+.date-picker-panel {
+  border-radius: 6px;
+  box-shadow: 0 10px 10px 0 rgba(0,0,0,0.08);
+  border: 1px solid #edeef1;
+}
+```
+
+---
+
+## 十、使用选型判断
+
+```
+单日期选择 → el-date-picker（type="date"）
+日期范围选择 → el-date-picker（type="daterange"）
+  + 右侧快捷预设面板 → 自定义 shortcuts 配置
+周范围选择 → el-date-picker（type="week"）
+月范围选择 → el-date-picker（type="monthrange"）
+季度选择 → 自定义下拉（EP 不内置）
+```

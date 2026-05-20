@@ -1,0 +1,113 @@
+---
+description: Pacvue 表单规则 02 — 间距规范（所有表单场景必须遵守）
+alwaysApply: true
+---
+
+# 02 · 表单间距规范
+
+所有间距值均来自 Pacvue Design System Figma 标注（节点 1377:22793）。
+
+---
+
+## 2.1 核心间距值
+
+| 间距类型 | 数值 | 说明 |
+|---------|------|------|
+| Label → 输入框 | **4px** | 字段内部，label 到 input 的垂直间距 |
+| 字段组 → 字段组（垂直外间距） | **24px** | 两个独立字段/字段组之间的垂直间距 |
+| 复杂组内子元素间距 | **12px** | 一个分组内子元素之间的垂直间距（如重复行） |
+| 两列字段横向 gap | **20px** | 同行两个字段列之间的水平间距 |
+| 重复行之间纵向 gap | **12px** | 如条件规则行、多行输入组的行间距 |
+
+---
+
+## 2.2 垂直方向间距示意
+
+```
+┌── 字段 A ──────────────────┐
+│ Label A                    │
+│ gap: 4px ↕                 │
+│ [Input A]                  │
+└────────────────────────────┘
+           ↕ 24px（字段组外间距）
+┌── 字段 B ──────────────────┐
+│ Label B                    │
+│ gap: 4px ↕                 │
+│ [Input B]                  │
+└────────────────────────────┘
+           ↕ 24px
+┌── 分组 C（复杂组）─────────┐
+│ * Requirements Label       │
+│ gap: 12px ↕                │
+│ ┌── 子元素 ──────────────┐ │
+│ │ [Select] [Input]  [×]  │ │  ← 行1
+│ │ gap: 12px ↕            │ │
+│ │ [Select] [Input]  [×]  │ │  ← 行2
+│ │ gap: 12px ↕            │ │
+│ │ [+ Add Row]            │ │
+│ └────────────────────────┘ │
+└────────────────────────────┘
+```
+
+---
+
+## 2.3 水平方向间距示意
+
+```
+[字段 A (1fr)]  ← gap: 20px →  [字段 B (1fr)]
+
+[输入框 (flex-1)]  ← gap: 20px →  [次级按钮 72px]
+```
+
+---
+
+## 2.4 CSS 参考
+
+```css
+/* 字段组：label → input */
+.field { display: flex; flex-direction: column; gap: 4px; }
+
+/* 字段组之间垂直外间距 */
+.form-body { display: flex; flex-direction: column; gap: 24px; }
+
+/* 两列布局 */
+.field-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* 复杂组内重复行 */
+.rule-row-group { display: flex; flex-direction: column; gap: 12px; }
+
+/* 输入框 + 操作按钮组合 */
+.input-with-action {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.input-with-action .btn-action { width: 72px; flex-shrink: 0; }
+```
+
+---
+
+## 2.5 Footer 按钮间距
+
+Footer（页面底部操作栏）内按钮间距：**20px**
+
+```css
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;         /* ← 20px，不是 8px */
+  padding: 0 24px;
+}
+```
+
+**Do / Don't：**
+- ✅ 字段组垂直间距用 **24px**
+- ✅ 行内复杂子元素间距用 **12px**
+- ✅ 双列字段 gap 用 **20px**
+- ❌ 不使用 16px、8px 作为字段组外间距（仅内部组件可用 8px 基础网格）
+- ❌ 不混用不同档位的间距值

@@ -1,0 +1,223 @@
+---
+description: Pacvue 多选框（Checkbox）组件规范——7 种状态、尺寸、表格全选交互、与 Element Plus 差异
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 13 · 多选框规范（Checkbox）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN` 节点 `1036-11313`
+
+---
+
+## 一、尺寸规范
+
+| 属性 | 值 |
+|---|---|
+| 点击热区 | `20×20px` |
+| 多选框本体 | `18×18px` |
+| 圆角 | `3px` |
+| 边框粗细 | `1.5px` |
+| 对勾尺寸 | `8×6px` |
+| 半选横线宽 | `8px`，`height: 2px` |
+
+---
+
+## 二、7 种状态
+
+### 2.1 未选（Default Unchecked）
+```css
+.cb {
+  width: 18px; height: 18px;
+  border-radius: 3px;
+  border: 1.5px solid #dedfe3;   /* 图标色/输入框 */
+  background: #ffffff;
+  cursor: pointer;
+}
+```
+
+### 2.2 悬停（Hover）
+```css
+.cb:hover:not(.disabled) {
+  border-color: var(--pcv-brand);   /* 品牌色边框，白底不变 */
+}
+```
+
+### 2.3 选中（Checked）
+- 背景：`var(--pcv-brand)` 填充
+- 对勾：白色，`8×6px`，左边框 + 下边框 `2px solid #fff`，旋转 -45°
+
+```css
+.cb.checked {
+  background: var(--pcv-brand);
+  border-color: var(--pcv-brand);
+}
+.cb.checked::after {
+  content: '';
+  width: 8px; height: 6px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, 0px);
+}
+```
+
+### 2.4 半选（Indeterminate）
+- 背景：`#ffffff` 白底
+- 边框：`var(--pcv-brand)` 品牌色
+- 横线：`8px × 2px`，`var(--pcv-brand)` 色，居中
+
+```css
+.cb.indeterminate {
+  background: #ffffff;
+  border-color: var(--pcv-brand);
+}
+.cb.indeterminate::after {
+  content: '';
+  width: 8px; height: 2px;
+  background: var(--pcv-brand);
+  border-radius: 1px;
+}
+```
+
+### 2.5 未选，禁用（Disabled Unchecked）
+```css
+.cb.disabled {
+  background: #f4f5f6;   /* 图标色/输入框禁用底色 */
+  border-color: #dedfe3;
+  cursor: not-allowed;
+}
+```
+
+### 2.6 选中，禁用（Disabled Checked）
+- 背景 `#f4f5f6`，边框 `#dedfe3`，对勾颜色 `#b2b2b8`（浅灰）
+
+```css
+.cb.disabled.checked::after {
+  border-color: #b2b2b8;
+}
+```
+
+### 2.7 半选，禁用（Disabled Indeterminate）
+- 背景 `#f4f5f6`，边框 `#dedfe3`，横线颜色 `#b2b2b8`
+
+```css
+.cb.disabled.indeterminate::after {
+  background: #b2b2b8;
+}
+```
+
+---
+
+## 三、状态速查表
+
+| 状态 | 背景 | 边框 | 图标 | 光标 |
+|---|---|---|---|---|
+| 未选 | `#FFFFFF` | `#DEDFE3` | — | pointer |
+| 悬停 | `#FFFFFF` | `var(--pcv-brand)` | — | pointer |
+| 选中 | `var(--pcv-brand)` | `var(--pcv-brand)` | ✓ 白色 | pointer |
+| 半选 | `#FFFFFF` | `var(--pcv-brand)` | — 品牌色横线 | pointer |
+| 未选·禁 | `#F4F5F6` | `#DEDFE3` | — | not-allowed |
+| 选中·禁 | `#F4F5F6` | `#DEDFE3` | ✓ `#B2B2B8` | not-allowed |
+| 半选·禁 | `#F4F5F6` | `#DEDFE3` | — `#B2B2B8` 横线 | not-allowed |
+
+---
+
+## 四、表格多选交互规则
+
+### 4.1 表头 Checkbox（全选控制器）
+
+| 当前状态 | 含义 | 点击后 |
+|---|---|---|
+| **未选** | 当前页无行被选中 | → 全选当前页，变为「选中」 |
+| **选中** | 当前页全部被选中 | → 全部取消，变为「未选」 |
+| **半选** | 当前页部分被选中 | → 全选当前页，变为「选中」 |
+
+### 4.2 状态同步逻辑
+
+```js
+function syncHeaderCheckbox() {
+  const total = allRows.length;
+  const selected = selectedRows.size;
+  if (selected === 0)         → 未选
+  else if (selected === total) → 选中
+  else                         → 半选（indeterminate）
+}
+```
+
+### 4.3 Bulk Operation 按钮联动
+
+| 已选行数 | Bulk 按钮状态 |
+|---|---|
+| 0 | 禁用（`cursor: not-allowed`，灰色边框，灰色文字）|
+| ≥ 1 | 激活（品牌色边框，品牌色文字，可点击，展开下拉菜单）|
+
+---
+
+## 五、完整 CSS 模板
+
+```css
+/* ── Checkbox 基础 ── */
+.cb {
+  width: 18px; height: 18px;
+  border-radius: 3px;
+  border: 1.5px solid #dedfe3;
+  background: #ffffff;
+  display: grid; place-items: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: border-color .12s, background .12s;
+  position: relative;
+}
+.cb:hover:not(.disabled) { border-color: var(--pcv-brand); }
+
+/* 选中 */
+.cb.checked {
+  background: var(--pcv-brand);
+  border-color: var(--pcv-brand);
+}
+.cb.checked::after {
+  content: '';
+  width: 8px; height: 6px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, 0px);
+  display: block;
+}
+
+/* 半选 */
+.cb.indeterminate {
+  background: #ffffff;
+  border-color: var(--pcv-brand);
+}
+.cb.indeterminate::after {
+  content: '';
+  width: 8px; height: 2px;
+  background: var(--pcv-brand);
+  border-radius: 1px;
+  display: block;
+}
+
+/* 禁用 */
+.cb.disabled {
+  background: #f4f5f6;
+  border-color: #dedfe3;
+  cursor: not-allowed;
+}
+.cb.disabled.checked::after   { border-color: #b2b2b8; }
+.cb.disabled.indeterminate::after { background: #b2b2b8; }
+```
+
+---
+
+## 六、与 Element Plus `el-checkbox` 对比
+
+| 属性 | EP 默认 | Pacvue 规范 | 需 override |
+|---|---|---|---|
+| 本体尺寸 | `14×14px` | **`18×18px`** | ✅ |
+| 圆角 | `2px` | **`3px`** | ✅ |
+| 边框色（未选）| `--el-checkbox-border-color` | `#DEDFE3` | ✅ |
+| 边框粗细 | `1px` | **`1.5px`** | ✅ |
+| 选中背景 | `--el-color-primary` | `var(--pcv-brand)` | ⚠️ primary 已映射 |
+| 半选背景 | `--el-color-primary` | **白底**（EP 是品牌色填充） | ✅ 需特殊 override |
+| 半选边框 | `--el-color-primary` | `var(--pcv-brand)` | ⚠️ primary 已映射 |
+| 禁用底色 | `--el-disabled-bg-color` | `#F4F5F6` | ✅ |
+| 热区尺寸 | 由 label 撑开 | `20×20px` 固定热区 | ✅ |

@@ -1,0 +1,160 @@
+---
+description: Pacvue Form Template — 输入控件视觉规范补充（完整规范见 .cursor/rules/表单规则/ 文件夹）
+alwaysApply: true
+---
+
+# Pacvue Form Template
+
+Apply these rules to ALL form fields across every create/edit page.
+
+## Field Anatomy
+
+```
+[Label — 14px/500/Inter]              ← optional: * for required, gray "(optional)" suffix
+[Input / Select / Custom Control]     ← height 36px, see variants below
+[Helper text or Error message]        ← 12px, conditional
+```
+
+- Label ↔ Field gap: `4px`
+- Field ↔ Next-field gap: `16px`
+- Section ↔ Section gap: `24px`
+
+---
+
+## Input Variants
+
+### Text Input
+
+```
+height: 36px
+padding: 8px 12px
+border: 1px solid #DEDFE3
+border-radius: 4px
+font: Inter Regular 14px / #45464f
+placeholder color: #B2B2B8
+focus: border-color var(--pcv-brand), no box-shadow fill
+```
+
+### Dropdown / Select (single)
+
+```
+height: 36px
+padding: 8px 12px
+border: 1px solid #DEDFE3
+border-radius: 4px          ← same as text input
+font: Inter Regular 14px / #66666c (selected value or placeholder color)
+placeholder color: #66666c
+
+Right icon: Pacvue dropdown arrow icon
+  - Size: 20 × 20px
+  - Icon: "top bar-arrow-down" from Pacvue Icon Library
+  - Position: absolute right 12px, vertically centered
+  - Color: #DEDFE3 (default) / var(--pcv-brand) (active/open)
+  - DO NOT use browser-native <select> arrow or CSS border-triangle
+```
+
+### Multi-select
+
+使用普通 Select 下拉，不使用标签式 tag-input，除非 PRD 明确要求多选标签展示。
+
+---
+
+## Dropdown Arrow Icon
+
+Pacvue uses a custom icon, NOT the browser's native `<select>` arrow, and NOT a CSS `border-triangle`.
+
+Until the Pacvue icon SVG is formally provided, render the arrow as:
+
+```html
+<!-- Pacvue dropdown arrow (placeholder SVG — replace with official icon) -->
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <path d="M5 7.5L10 12.5L15 7.5" stroke="#DEDFE3" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+```
+
+**Position**: absolute right `12px`, vertically centered inside the field.
+
+---
+
+## Required & Optional Labels
+
+```
+Required:  <span style="color: #EA5455">*</span> FieldName   ← asterisk BEFORE name
+Optional:  FieldName <span style="color:#82858B; font-weight:400">(optional)</span>
+```
+
+---
+
+## Validation States
+
+| State | Border | Message | Color |
+|-------|--------|---------|-------|
+| Default | `#DEDFE3` | — | — |
+| Focus | `var(--pcv-brand)` | — | — |
+| Error | `#EA5455` | Inline below field, 12px | `#EA5455` |
+| Disabled | `#EDEEF1` | — | bg `#F6F7FB`, text `#B2B2B8` |
+| Read-only | `#EDEEF1` | "Read-only after creation" hint | bg `#F6F7FB`, lock icon right |
+
+---
+
+## Read-Only Field Rules
+
+- `background: #F6F7FB`
+- `border: 1px solid #EDEEF1`
+- `color: #66666c`
+- Lock icon (16×16) on the right inside the field
+- `cursor: not-allowed`
+- `tabindex="-1"` — cannot receive keyboard focus
+- Hover tooltip: explain WHY field is locked
+
+---
+
+## Two-Column Field Grid
+
+When placing two fields side by side:
+
+```css
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 16px;
+```
+
+Only use 2-column layout for related short fields (e.g. Language + Currency).
+Never put unrelated long fields side-by-side.
+
+---
+
+## 特殊字段：带下拉的操作按钮（Add / Select with Dropdown）
+
+当字段内容需要用户通过下拉菜单「添加」或「选择」，且选项较复杂时，使用描边按钮 + 下拉箭头图标形式，而非普通 select 控件。
+
+```
+样式：
+  border: 1px solid var(--pcv-brand)
+  color: var(--pcv-brand)
+  background: transparent
+  height: 36px
+  padding: 8px 16px
+  border-radius: 4px
+  font: Inter Medium 14px
+  gap: 8px（文字与箭头图标之间）
+
+右侧图标：Pacvue arrow-down / chevron-down，20×20px，color: var(--pcv-brand)
+点击行为：展开下拉菜单供用户选择（非 <select>，用自定义 dropdown）
+```
+
+典型例子：Product Source → `Add Product Source ▾`（蓝色描边按钮）
+
+---
+
+## Pending — To Be Defined
+
+The following form patterns are pending user-provided examples:
+
+- [ ] Multi-select tag input vs. dropdown behavior
+- [ ] Date picker field style
+- [ ] Number input with unit suffix (e.g. "Budget $___")
+- [ ] Textarea style
+- [ ] File upload / drag-and-drop field
+- [ ] Inline field action buttons (e.g. "Add row")

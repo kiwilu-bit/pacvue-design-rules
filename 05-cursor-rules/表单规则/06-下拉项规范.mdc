@@ -1,0 +1,231 @@
+---
+description: Pacvue 下拉菜单（Dropdown）组件规范——下拉项样式、触发器类型、状态、使用场景及与 Element Plus 的差异 check
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 06 · 下拉项规范（Dropdown）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN` node `1377-21955`
+
+---
+
+## 一、定义与使用场景
+
+下拉菜单（Dropdown）把备选命令或选项收纳到向下展开的浮层容器里。  
+**分为两大类：**
+
+| 类别 | 组件 | 说明 |
+|---|---|---|
+| **操作 / 命令型** | `el-dropdown` | 触发后展示一组操作项，用户点击执行命令 |
+| **表单选择型** | `el-select` | 与表单字段绑定，用户选择一个或多个值 |
+
+### 推荐使用场景
+
+1. **导航二级菜单** — 顶部导航或侧边导航项展开子菜单
+2. **工具栏操作集合** — 表格/列表页的"更多操作 ···"批量操作按钮
+3. **页面内容过滤 / 排序** — Filterbar 中的筛选器（多用 `el-select`）
+4. **操作命令集合** — 对单条记录执行 Edit / Delete / Export 等操作
+
+### 不使用下拉的场景
+
+- 选项 ≤ 3 个且不需要隐藏时 → 使用 Radio / Checkbox 直接平铺
+- 需要多选并有明确确认步骤时 → 使用 Dialog + Checkbox 列表
+- 导航本身有足够空间展示 → 不折叠
+
+---
+
+## 二、触发器类型（Trigger Button）
+
+Pacvue 共有三种触发器样式：
+
+### 1. 按钮型（Button Trigger）—— `el-dropdown`
+```
+height: 36px
+padding: 8px 20px
+border-radius: var(--radius-sm)        /* 4px */
+background: var(--pcv-brand)           /* #FF9F43 / #0253B6 */
+color: #FFFFFF
+font: Inter Medium 14px / 20px
+gap between label and arrow icon: 8px
+arrow icon size: 20×20px
+arrow rotates 180° when open
+```
+
+**状态：**
+| 状态 | 背景 | 文字 | 说明 |
+|---|---|---|---|
+| Default | `var(--pcv-brand)` | `#FFFFFF` | |
+| Hover | 同 Default + `box-shadow: 0 0 10px 0 rgba(255,159,67,0.65)` | | 阴影光晕 |
+| Active（点击展开）| 同 Default | | 箭头反转 |
+| Disabled | `rgba(--pcv-brand, 0.65)` | `#FFFFFF` | 箭头同样 0.65 透明度 |
+
+### 2. 文字型（Text Trigger）—— 无边框
+```
+height: 36px
+padding: 8px 20px
+border-radius: var(--radius-sm)
+background: transparent
+color: var(--pcv-brand)
+font: Inter Medium 14px / 20px
+```
+
+**状态：**
+| 状态 | 背景 | 文字 |
+|---|---|---|
+| Default / Hover | transparent | `var(--pcv-brand)` |
+| Hover | `rgba(--pcv-brand, 0.05)` | `var(--pcv-brand)` |
+| Disabled | transparent | `rgba(--pcv-brand, 0.65)` |
+
+### 3. 边框型（Outlined Trigger）
+```
+height: 36px
+padding: 8px 20px
+border-radius: var(--radius-sm)
+border: 1px solid var(--pcv-brand)
+background: #FFFFFF
+color: var(--pcv-brand)
+font: Inter Medium 14px / 20px
+```
+
+**状态：**
+| 状态 | 背景 | 边框 |
+|---|---|---|
+| Default | `#FFFFFF` | `var(--pcv-brand)` |
+| Hover | `rgba(--pcv-brand, 0.05)` | `var(--pcv-brand)` |
+| Active（点击展开）| `rgba(--pcv-brand, 0.05)` | `rgba(--pcv-brand, 0.65)` |
+| Disabled | `rgba(--pcv-brand, 0.05)` | `rgba(--pcv-brand, 0.65)` |
+
+---
+
+## 三、下拉浮层容器（Dropdown Menu Panel）
+
+```css
+background: #FFFFFF;
+border-radius: var(--radius-md);        /* 6px */
+box-shadow: 0 4px 14px 4px rgba(0, 0, 0, 0.06);
+min-width: 70px;                        /* 与触发器等宽，最小不低于 70px */
+padding-top: 6px;
+padding-bottom: 6px;
+```
+
+---
+
+## 四、下拉项（Dropdown Item）样式
+
+### 基础型（无图标）
+```css
+height: 40px;
+padding: 10px 20px;
+font: Inter Regular 14px / 20px;
+display: flex;
+align-items: center;
+```
+
+### 带图标型
+```css
+/* 在基础型基础上增加 */
+gap: 8px;
+/* 图标尺寸 */
+icon-size: 20×20px;
+```
+
+### 下拉项文字溢出
+- 文字内容超出宽度时：文本截断显示省略号 `...`，不换行
+- 超宽 popover（如 240px）：同样不换行，截断
+
+### 多级下拉
+- 子菜单入口：右侧带 `arrow-right` 图标（24×24px）
+- 子菜单在同级水平方向弹出，样式同父级浮层
+
+---
+
+## 五、下拉项状态
+
+| 状态 | 背景色 | 文字色 | 字重 |
+|---|---|---|---|
+| **Default** | transparent | `#6E6B7B` | Regular 400 |
+| **Hover** | `rgba(255,159,67, 0.05)` | `#66666C` | Regular 400 |
+| **Active / Selected（点击）** | transparent | `var(--pcv-brand)` | Medium 500 |
+| **Disabled** | transparent | `#B2B2B8` | Regular 400 |
+
+> 蓝色主题下 Hover 背景改为 `rgba(2,83,182, 0.05)`，Active 文字色改为 `#0253B6`。
+
+---
+
+## 六、与 Element Plus 默认行为对比 & 差异
+
+| 属性 | Element Plus 默认 | Pacvue 规范 | 是否需要 override |
+|---|---|---|---|
+| `el-dropdown-item` 高度 | ~34px（padding: 5px 16px） | **40px**（padding: 10px 20px） | ✅ 需要 override |
+| `el-dropdown-item` 内边距 | `5px 16px` | **10px 20px** | ✅ 需要 override |
+| `el-dropdown-item` hover 背景 | `--el-color-primary-light-9`（约 10% 主色） | **`rgba(brand, 0.05)`** | ✅ 需要 override |
+| `el-dropdown-item` 选中文字色 | `--el-color-primary` | **`var(--pcv-brand)`** | ⚠️ 若已映射 `--el-color-primary` 则自动生效 |
+| `el-dropdown-menu` border-radius | `4px` | **6px** | ✅ 需要 override |
+| `el-dropdown-menu` box-shadow | `0 0 12px 0 rgba(0,0,0,.1)` | **`0 4px 14px 4px rgba(0,0,0,0.06)`** | ✅ 需要 override |
+| `el-select-dropdown__item` 高度 | `34px` | **40px** | ✅ 需要 override |
+| `el-select-dropdown__item` padding | `0 20px` | **10px 20px** | ✅ 需要 override（高度已保证） |
+| 当前项目中 `style.css` 是否有 override | ❌ 无任何 el-dropdown / el-select-dropdown 覆盖 | — | **当前存在差距，需补充** |
+
+### 当前项目现状（扫描结论）
+- `el-dropdown` / `el-dropdown-item`：**项目中完全未使用**，操作菜单场景目前缺失此组件
+- `el-select` / `el-option`：在多个页面中使用，但未全局统一样式 override（高度、padding、hover 均依赖 EP 默认）
+- `style.css` 中**没有** `.el-dropdown-menu`、`.el-select-dropdown` 任何规则
+
+---
+
+## 七、CSS Override 参考（补充到 el-overrides.css）
+
+```css
+/* ===== Dropdown Menu Panel ===== */
+.el-dropdown-menu,
+.el-select-dropdown {
+  border-radius: var(--radius-md) !important;   /* 6px */
+  box-shadow: 0 4px 14px 4px rgba(0, 0, 0, 0.06) !important;
+  padding: 6px 0;
+}
+
+/* ===== Dropdown Item / Select Option ===== */
+.el-dropdown-menu__item,
+.el-select-dropdown__item {
+  height: 40px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #6e6b7b;
+}
+
+.el-dropdown-menu__item:not(.is-disabled):hover,
+.el-select-dropdown__item:hover:not(.is-disabled) {
+  background: rgba(var(--pcv-brand-rgb), 0.05);
+  color: #66666c;
+}
+
+.el-dropdown-menu__item.is-active,
+.el-select-dropdown__item.selected {
+  color: var(--pcv-brand);
+  font-weight: 500;
+  background: transparent;
+}
+
+.el-dropdown-menu__item.is-disabled,
+.el-select-dropdown__item.is-disabled {
+  color: #b2b2b8;
+}
+```
+
+---
+
+## 八、使用选型判断树
+
+```
+需要下拉交互？
+  ├── 表单字段（有值绑定）
+  │     ├── 单选 → el-select
+  │     └── 多选 → el-select multiple
+  └── 操作 / 命令（无值绑定，执行动作）
+        ├── 固定操作集合（编辑/删除/导出） → el-dropdown + el-dropdown-item
+        ├── 顶部导航次级菜单 → el-dropdown（文字型触发器）
+        └── 更多操作 "···" → el-dropdown（图标触发器）
+```

@@ -1,0 +1,114 @@
+---
+description: Pacvue 表单规则 04 — 表单页面三段式结构与 FooterToolBar 规范
+alwaysApply: true
+---
+
+# 04 · 表单页面布局与 FooterToolBar
+
+## 4.1 表单页面三段式结构
+
+每个表单页面由 **Header、Body、Footer** 三段构成，各司其职。
+
+```
+┌───────────────────── 表单页面 ────────────────────────────┐
+│                                                           │
+│  [Header 区域]                                            │
+│   声明主题；放置影响全局表单的操作（如全局开关、标题）     │
+│                                                           │
+├───────────────────────────────────────────────────────────┤
+│                                                           │
+│  [Body 内容区]                                            │
+│   放置字段内容；放置跟随局部内容生效的操作                 │
+│   （如「+ Add Row」、「Manage」按钮等内联操作）            │
+│                                                           │
+├───────────────────────────────────────────────────────────┤
+│  [Footer 完结操作区]                                      │
+│   放置"完结"类操作：Cancel / Save / Create / Next         │
+└───────────────────────────────────────────────────────────┘
+```
+
+| 区域 | 放置内容 | 禁止放置 |
+|------|---------|---------|
+| Header | 页面标题、全局开关、影响整个表单的操作 | 字段输入控件 |
+| Body | 所有字段、分组、内联添加/删除操作 | Cancel/Save 等终结按钮 |
+| Footer | Cancel、Save、Create、Next 等终结类操作 | 字段内容、信息展示 |
+
+---
+
+## 4.2 FooterToolBar 使用规则
+
+### 何时必须使用 FooterToolBar（页面级固定底部栏）
+
+以下任一条件满足时，必须将操作按钮放入 FooterToolBar：
+
+1. **内容被折叠/隐藏**：单屏无法展示完整内容，或内容被多个 Tab 页签分割
+2. **内容复杂度高**：有多个分组，每个分组有独立的操作区，需要将「完成」操作与内容区明确区分
+
+> 简单弹窗（720px）中，Footer 直接作为弹窗的最后一行，不需要 FooterToolBar。
+
+### FooterToolBar 样式规范
+
+```css
+.footer-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 62px;                      /* 侧边栏宽度 */
+  width: calc(100vw - 62px);
+  height: 64px;
+  background: #ffffff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;                 /* 右侧内边距 24px */
+  gap: 20px;                       /* 按钮之间间距 20px */
+  z-index: 200;                    /* 高于表单内容，高于 sticky 标题栏 */
+}
+```
+
+| 属性 | 数值 |
+|------|------|
+| 高度 | **64px** |
+| 定位 | `position: fixed; bottom: 0` |
+| z-index | **200**（高于一切页面内容） |
+| 右内边距 | **24px** |
+| 按钮间距 | **20px** |
+| 背景 | `#ffffff` |
+| 顶部阴影 | `box-shadow: 0 -2px 8px rgba(0,0,0,0.06)` |
+
+### 按钮规格
+
+| 按钮类型 | 样式 | 宽度 |
+|---------|------|------|
+| 主要按钮（Create/Save/Next） | `bg: var(--pcv-brand)`，白色文字 | min 88px |
+| 灰色按钮（Cancel） | `border: 1px solid #DEDFE3`，`color: #82858b` | min 88px |
+
+所有按钮：`height: 36px`，`border-radius: 4px`，`font: Inter 14px/500`
+
+### 内容区补偿
+
+FooterToolBar 固定在底部，内容区必须加底部 padding 防止遮挡：
+
+```css
+.page-content {
+  padding-bottom: 80px; /* 64px toolbar + 16px gap */
+}
+```
+
+---
+
+## 4.3 弹窗 Footer（非 FooterToolBar）
+
+弹窗内的 Footer 不固定，跟随弹窗内容：
+
+```css
+.dialog-footer {
+  height: 68px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  border-top: 1px solid var(--pcv-border);
+}
+```

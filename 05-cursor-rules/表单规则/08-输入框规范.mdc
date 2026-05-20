@@ -1,0 +1,301 @@
+---
+description: Pacvue 输入框（Input）组件规范——尺寸、8 种状态、搜索框两种样式、特殊输入框、与 Element Plus 差异 check
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 08 · 输入框规范（Input）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN` node `11267-142581`
+
+---
+
+## 一、组件结构（7 个组成部分）
+
+```
+┌─ 标题 Label（可选）──────────────────────┐
+│  间距 4px (s1)                           │
+├─ 容器 Container ─────────────────────────┤
+│  [前导图标] [placeholder/value] [尾随图标] │
+└──────────────────────────────────────────┘
+   提示/验证文本（可选）
+```
+
+| 编号 | 部分 | 说明 |
+|---|---|---|
+| 1 | 容器 | 可交互输入区，承载所有子元素 |
+| 2 | 输入文本 | 用户输入的值，Inter Regular 14px |
+| 3 | 标题 Label | 输入框上方，告知用户填写内容；间距 `4px` |
+| 4 | 占位符文本 | 未输入时的提示文字，颜色 `#B2B2B8` |
+| 5 | 提示/验证文本 | 状态反馈文字，12px，显示在输入框下方 |
+| 6 | 前导图标（可选） | 表达输入类型，左侧；20×20px |
+| 7 | 尾随图标（可选） | 附加控件：清除（close-circle-fill）、显示/隐藏 |
+
+---
+
+## 二、尺寸规范
+
+| 场景 | 高度 | 最小宽度 | 水平内边距 | 元素间距 |
+|---|---|---|---|---|
+| 标准（创建页/弹窗/抽屉） | **36px** | **256px**（s64） | `12px`（s3） | `20px`（s4） |
+| 小号（Widget/紧凑表单） | **32px** | **160px**（s40） | `12px`（s3） | `16px`（s4 的倍数） |
+
+- **字体：** Inter Regular 14px / line-height 20px
+- **圆角：** `4px`（`var(--radius-sm)`）
+- **尾随图标与文字间距：** `8px`（s2）
+- **标题与输入框间距：** `4px`（s1）
+
+---
+
+## 三、输入框 8 种状态
+
+| 状态 | 背景色 | 边框 | 文字/Placeholder | 尾随图标 |
+|---|---|---|---|---|
+| **默认 Default** | `#FFFFFF` | `1px solid #DEDFE3` | Placeholder: `#B2B2B8` | clear icon（透明，不可见） |
+| **悬停 Hover** | `#FFFFFF` | `1px solid var(--pcv-brand)` 🎨 | Placeholder: `#B2B2B8` | — |
+| **点击 Click/Focus** | `#FFFFFF` | `1px solid var(--pcv-brand)` 🎨 | 光标可见，`#66666C` | — |
+| **已输入 Inputted** | `#FFFFFF` | `1px solid #DEDFE3` | 值文字: `#66666C` | close-circle-fill 可见 |
+| **禁用 Disabled** | `#F4F5F6` | `1px solid #DEDFE3` | `#B2B2B8` | 无图标 |
+| **成功 Success** | `#FFFFFF` | `1px solid #28C76F` | `#66666C` | clear icon + 提示文字 `#28C76F` |
+| **警告 Warning** | `#FFFFFF` | `1px solid #FF9F43` | `#66666C` | clear icon + 提示文字 `#FF9F43` |
+| **失败 Error** | `#FFFFFF` | `1px solid #EA5455` | `#66666C` | clear icon + 提示文字 `#EA5455` |
+
+> 🎨 **悬停/点击边框颜色随主题色切换**：橙色主题 `#FF9F43`，蓝色主题 `#0253B6`，始终使用 `var(--pcv-brand)`。
+
+### 提示/验证文本（Success / Warning / Error 共用）
+```css
+font: Inter Regular 12px;
+line-height: 18px;
+padding-left: 12px;
+margin-top: 4px;   /* 与输入框的间距 */
+
+/* 颜色按状态 */
+.success  { color: #28c76f; }
+.warning  { color: #ff9f43; }
+.error    { color: #ea5455; }
+```
+
+### 尾随图标（close-circle-fill）
+- 尺寸：`20×20px`
+- 颜色：`#B2B2B8`（悬停输入框时可高亮为 brand 色）
+- 默认状态：`opacity: 0`（不可见但占位）
+- 已输入状态：`opacity: 1`（可见，点击清空）
+
+---
+
+## 四、搜索框（两种样式）
+
+### 样式一：搜索图标在右侧（Search at end）
+```
+[  Search placeholder  ] | 🔍
+```
+```css
+/* 外层容器 */
+border: 1px solid #D8D6DE;
+border-radius: 4px;
+height: 36px;
+
+/* 搜索图标区域（右侧独立块） */
+border-left: 1px solid #D8D6DE;
+padding: 8px;
+border-radius: 0 6px 6px 0;   /* 右侧两角圆角为 6px */
+```
+
+### 样式二：搜索图标在左侧（Search at start）
+```
+[ 🔍 Search placeholder        × ]
+```
+```css
+/* 外层容器 */
+border: 1px solid #DEDFE3;
+border-radius: 6px;            /* 注意：搜索框样式二圆角为 6px！ */
+height: 36px;
+
+/* 搜索图标区域（左侧独立块） */
+padding: 9px;
+border-radius: 6px 0 0 6px;
+
+/* 右侧：clear 图标 */
+size: 20×20px;
+```
+
+---
+
+## 五、特殊输入框
+
+### 5.1 前缀型（Prefix Label）
+```
+[ http:// | Search placeholder    ]
+```
+- 前缀文字区：`border-right: 1px solid #DEDFE3`，`padding: 8px 9px`，`border-radius: 6px 0 0 6px`
+- 前缀文字颜色：`#B2B2B8`（placeholder 色）
+- 输入区域：`flex: 1`，照常
+
+### 5.2 后缀型（Suffix Action）
+```
+[ Search placeholder    | % ↓ ]
+```
+- 后缀区：`border-left: 1px solid #D8D6DE`，`padding: 8px`，`border-radius: 0 6px 6px 0`
+- 后缀可含文字（`%`）+ 下拉箭头图标
+
+### 5.3 百分比型（Inline %）
+```
+[ 100                        % ]
+```
+- 值文字左对齐，`%` 右对齐，均在同一容器内
+- padding: `12px`
+
+### 5.4 货币型（Inline $）
+```
+[ $  100                       ]
+```
+- `$` 作为前缀文字，与值文字在同一行，gap: `8px`
+
+### 5.5 组合输入框（Combined Select + Input）
+```
+[ Select  ↓ | Search placeholder ]
+```
+- 左侧：Select 区，`border-right: 1px solid #D8D6DE`，`border-radius: 4px 0 0 4px`
+- 右侧：Input 区，`border-radius: 0 4px 4px 0`
+- 两段组合为一个整体外观
+
+---
+
+## 六、文本域（Textarea）
+
+- 用于多行文本输入
+- 最小高度：`86px`（一般），内边距：`8px 12px`
+- Placeholder: `#B2B2B8`，字号同 Input：14px
+- 支持字数计数（右下角显示 `0/200`）
+- 边框、状态样式与 Input 一致（圆角用 `4px`）
+
+---
+
+## 七、与 Element Plus 差异对比
+
+| 属性 | EP 默认 | Pacvue 规范 | 状态 |
+|---|---|---|---|
+| 高度（normal） | `32px` | **36px** | ✅ 已在 Select override 中部分处理，需单独添加 el-input |
+| 高度（small） | `24px` | **32px** | ✅ 需 override |
+| 水平内边距 | `0 15px` | **0 12px** | ✅ 需 override |
+| 边框颜色（Default） | `--el-border-color`（#DCDFE6） | `#DEDFE3` | ⚠️ 极近，token 映射即可 |
+| Hover/Focus 边框 | `--el-color-primary` | **`var(--pcv-brand)`（随主题变化）** | ⚠️ primary 已映射，自动生效 |
+| 禁用背景 | `--el-fill-color-light`（#f5f7fa） | `#F4F5F6` | ✅ 接近，需精确对齐 |
+| Placeholder 色 | `--el-text-color-placeholder`（#A8ABB2） | `#B2B2B8` | ✅ 需 override |
+| 输入值颜色 | `--el-text-color-regular`（#606266） | `#66666C` | ✅ 接近，需精确 |
+| 提示文字字号 | 通过 `el-form-item__error` 控制（12px） | **12px / 18px line-height** | ⚠️ line-height 需确认 |
+| 成功状态边框 | 无内置（需自定义） | `1px solid #28C76F` | ✅ 需自定义 class |
+| 警告状态边框 | 无内置 | `1px solid #FF9F43` | ✅ 需自定义 class |
+| 失败/Error 边框 | `--el-color-danger`（#F56C6C）| `#EA5455` | ✅ token 已映射 |
+| 圆角 | `--el-border-radius-base`（4px） | `4px` | ✅ 匹配 |
+| 搜索框样式二圆角 | — | **6px** | ✅ 自定义组件类 |
+
+---
+
+## 八、CSS Override 参考（补充到 el-overrides.css）
+
+```css
+/* ===== Input Trigger ===== */
+.el-input__wrapper {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);     /* 4px */
+  box-shadow: 0 0 0 1px #dedfe3 inset;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--pcv-brand) inset;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--pcv-brand) inset;
+}
+
+.el-input.is-disabled .el-input__wrapper {
+  background-color: #f4f5f6;
+  box-shadow: 0 0 0 1px #dedfe3 inset;
+}
+
+/* Small size */
+.el-input--small .el-input__wrapper {
+  height: 32px;
+}
+
+/* Placeholder */
+.el-input__inner::placeholder {
+  color: #b2b2b8;
+  font-size: 14px;
+}
+
+/* Value text */
+.el-input__inner {
+  color: #66666c;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Textarea */
+.el-textarea__inner {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #dedfe3;
+  color: #66666c;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.el-textarea__inner:hover {
+  border-color: var(--pcv-brand);
+}
+
+.el-textarea__inner:focus {
+  border-color: var(--pcv-brand);
+  outline: none;
+}
+
+/* ===== Form Item Error (失败状态提示文字) ===== */
+.el-form-item__error {
+  font-size: 12px;
+  line-height: 18px;
+  color: #ea5455;
+  padding-left: 0;
+  padding-top: 4px;
+}
+
+/* ===== Success / Warning State (自定义 class) ===== */
+.el-input.is-success .el-input__wrapper {
+  box-shadow: 0 0 0 1px #28c76f inset;
+}
+
+.el-input.is-warning .el-input__wrapper {
+  box-shadow: 0 0 0 1px #ff9f43 inset;
+}
+
+/* Success / Warning hint text */
+.input-hint--success { color: #28c76f; font-size: 12px; line-height: 18px; padding-left: 12px; margin-top: 4px; }
+.input-hint--warning { color: #ff9f43; font-size: 12px; line-height: 18px; padding-left: 12px; margin-top: 4px; }
+.input-hint--error   { color: #ea5455; font-size: 12px; line-height: 18px; padding-left: 12px; margin-top: 4px; }
+
+/* ===== Search Box Style 2 (圆角 6px) ===== */
+.pcv-search-input .el-input__wrapper {
+  border-radius: 6px;
+}
+```
+
+---
+
+## 九、使用规则摘要
+
+```
+普通文本输入 → el-input（height: 36px，padding: 12px）
+搜索框（过滤条件）→ 样式一（图标在右）或样式二（图标在左，圆角 6px）
+百分比/货币输入 → el-input 配合 prefix/suffix slot
+前缀标签输入 → prepend slot（http://）
+组合 Select+Input → el-select + el-input 横向组合
+多行文本 → el-textarea（默认高度 86px，字数计数可选）
+
+状态提示文字：
+  Success → .input-hint--success（#28c76f，12px）
+  Warning → .input-hint--warning（#ff9f43，12px）
+  Error   → el-form-item__error（#ea5455，12px）—— EP 内置
+```

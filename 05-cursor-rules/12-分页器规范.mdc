@@ -1,0 +1,267 @@
+---
+description: Pacvue 分页器（Pagination）组件规范——布局结构、左右两端分布、页码按钮、当前页、每页数量、Go to page、显示逻辑与兼容性
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 12 · 分页器规范（Pagination）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN`  
+> 节点 `7347:114707`
+
+---
+
+## 一、布局结构
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ Total 100 entries,  [10/page ↕]          [<][1][2][3][4][5][6][···][1000][>]  Go to page [1] │
+│ ←────── 左侧 ──────────────────────────  ──────────────── 右侧 ─────────────────────────────→ │
+└──────────────────────────────────────────────────────────────────┘
+       justify-content: space-between，height: 64px
+```
+
+### 1.1 核心规则（必须遵守）
+
+1. **整体 `justify-content: space-between`**：左侧放 total + page size，右侧放所有导航控件
+2. **分页器与表格上下排列，不在同一行**（分页器在表格体下方，`border-top` 分隔）
+3. **分页器高度固定 64px**，`border-top: 1px solid #EDEEF1`
+4. 左侧：`Total X entries,` + 每页数量下拉
+5. 右侧：`[<]` 页码 `[>]` + `Go to page` + 输入框——全部在右侧一组
+
+---
+
+## 二、CSS 实现
+
+```css
+/* ── 分页器容器 ── */
+.pagination {
+  height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* 左右两端 */
+  border-top: 1px solid #edeef1;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+/* ── 左侧：Total + page size ── */
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #6e6b7b;       /* Figma token: Heading & Display Text */
+  white-space: nowrap;
+}
+
+/* 每页数量下拉 */
+.page-size-select {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid #d8d6de;    /* Figma token: Border/Input（注意：比条件框的 #DEDFE3 稍深）*/
+  border-radius: 5px;            /* Figma 实测：5px，非 4px */
+  font-size: 14px;
+  font-weight: 500;
+  color: #5e5873;
+  background: #ffffff;
+  appearance: none;
+  cursor: pointer;
+}
+.page-size-select:hover,
+.page-size-select:focus { border-color: var(--pcv-brand); }
+
+/* ── 右侧：页码导航 ── */
+.pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+```
+
+---
+
+## 三、页码按钮
+
+```css
+/* 通用页码按钮：32×32px */
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid #dedfe3;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  color: #66666c;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color .12s, color .12s;
+  flex-shrink: 0;
+}
+.page-btn:hover {
+  border-color: var(--pcv-brand);
+  color: var(--pcv-brand);
+}
+
+/* 当前页：brand 色边框 + brand 色文字 + 500 weight，无背景填充 */
+.page-btn.active {
+  border-color: var(--pcv-brand);
+  color: var(--pcv-brand);
+  font-weight: 500;
+}
+
+/* 省略号：无 border，不可点击，不响应 hover */
+.page-btn.ellipsis {
+  border-color: transparent;
+  cursor: default;
+  color: #82858b;
+}
+.page-btn.ellipsis:hover {
+  border-color: transparent;
+  color: #82858b;
+}
+
+/* 上一页/下一页箭头 */
+.page-btn.nav svg {
+  width: 16px;
+  height: 16px;
+  stroke: #66666c;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.page-btn.nav:hover svg { stroke: var(--pcv-brand); }
+```
+
+### 关键数值汇总
+
+| 属性 | 值 |
+|---|---|
+| 按钮尺寸 | **32×32px** |
+| 按钮圆角 | **4px** |
+| 默认边框 | `1px solid #DEDFE3` |
+| 默认文字色 | `#66666C` |
+| 当前页边框 | `1px solid var(--pcv-brand)` |
+| 当前页文字 | `var(--pcv-brand)`, font-weight: **500** |
+| 当前页背景 | 透明（**无填充色**） |
+| 省略号 | 无 border，`color: #82858B` |
+| 按钮间距 | `gap: 8px` |
+
+---
+
+## 四、每页数量下拉
+
+| 属性 | 值 | 说明 |
+|---|---|---|
+| 高度 | **32px** | — |
+| 圆角 | **5px** | 注意：非标准 4px，来自 Figma |
+| 边框 | `1px solid #D8D6DE` | 比条件框的 `#DEDFE3` 稍深 |
+| 文字"10/" | Inter Medium 14px，`#5E5873` | — |
+| 文字"page" | Inter Regular 14px，`#5E5873` | — |
+| 箭头图标 | `sort icon` 16×16px | 上下双箭头 |
+
+---
+
+## 五、Go to page 输入框
+
+```css
+.page-goto-input {
+  width: 58px;              /* Figma 实测 */
+  height: 32px;
+  border: 1px solid #dedfe3;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #45464f;
+  background: #ffffff;
+}
+.page-goto-input:focus { border-color: var(--pcv-brand); }
+```
+
+- "Go to page" 文字：Inter Regular 14px，`#66666C`，与输入框 `gap: 8px`
+- 整个 goto 组：包含在 `.pagination-right` 内（右侧一组）
+
+---
+
+## 六、分页器显示逻辑
+
+> 来自 Figma 标注文字
+
+| 场景 | 行为 |
+|---|---|
+| 数据量多，需分页 | 分页器出现，固定在表格底部 |
+| 切换每页数量后，当前页数据 **≤** 每页数量 | **分页器消失**，只保留"每页数量"切换器 |
+| 查看至最后一页，最后页数量 **≤** 每页数量 | **分页器不消失**（保留让用户感知位置） |
+
+---
+
+## 七、完整 HTML 模板
+
+```html
+<div class="pagination">
+
+  <!-- 左侧：total + page size -->
+  <div class="pagination-left">
+    Total 128 entries,
+    <select class="page-size-select">
+      <option>10/page</option>
+      <option>20/page</option>
+      <option>50/page</option>
+    </select>
+  </div>
+
+  <!-- 右侧：导航 + Go to page（全部在右侧） -->
+  <div class="pagination-right">
+    <button class="page-btn nav">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="page-btn">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <button class="page-btn active">4</button>
+    <button class="page-btn">5</button>
+    <button class="page-btn">6</button>
+    <button class="page-btn ellipsis">···</button>
+    <button class="page-btn">1000</button>
+    <button class="page-btn nav">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="page-goto">
+      Go to page
+      <input class="page-goto-input" type="number" value="4" min="1" />
+    </div>
+  </div>
+
+</div>
+```
+
+---
+
+## 八、与 Element Plus `el-pagination` 对比
+
+| 属性 | EP 默认 | Pacvue 规范 | 需 override |
+|---|---|---|---|
+| 整体高度 | 32px（无固定行高）| **64px（含 border-top 的整行）** | ✅ |
+| 布局 | 所有元素一排 flex | **justify-between（左 total，右 nav）** | ✅ |
+| 页码按钮尺寸 | 28px | **32×32px** | ✅ |
+| 当前页样式 | 填充背景色 | **仅 brand 色边框 + 文字，无背景** | ✅ |
+| 页码圆角 | 2px | **4px** | ✅ |
+| every-page 下拉高度 | 28px | **32px** | ✅ |
+| every-page 圆角 | 4px | **5px** | ✅ |
+| every-page 边框 | `--el-border-color` | **`#D8D6DE`** | ✅ |
+| "Go to page" 位置 | 可配置 | **始终在右侧最末** | ✅ |
+| 分页器与表格间距 | 无规定 | **0（靠 border-top 分隔）** | ✅ |
+
+---
+
+## 九、兼容性注意
+
+- 分页器 `height: 64px` + `flex-shrink: 0`，不随内容压缩
+- 父容器（`.table-card`）需为 `flex-column`，分页器排在 table-wrap 下方
+- 分页器 `padding: 0 24px` 与筛选栏、操作栏左右边距一致（均 24px）
+- 页码按钮 `flex-shrink: 0`，页数多时出现水平滚动而非换行

@@ -1,0 +1,279 @@
+---
+description: Pacvue 选择器（Select）组件规范——触发器尺寸、各状态样式、单选/多选下拉选项、Tag 显示、与 Element Plus 差异 check
+globs: ["**/*.vue", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+# 07 · 选择器规范（Select）
+
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN` node `1377-18475`
+
+---
+
+## 一、组件定义
+
+选择器（`el-select`）结构同输入框，支持：
+- **单选** — 从下拉面板中选择一个值
+- **多选** — 从下拉面板中选择多个值，已选项以 Tag 形式显示在触发器内
+- **搜索（可选）** — 支持输入框搜索过滤选项
+- **穿梭框（Cascader）** — 层级选择
+
+---
+
+## 二、触发器尺寸
+
+| 情境 | 高度 | 最小宽度 | 内边距 | 圆角 |
+|---|---|---|---|---|
+| **普通（一般表单）** | **36px** | **256px**（s64） | `8px 12px` | `4px` |
+| **小号（Widget / 紧凑布局）** | **32px** | **160px**（s40） | `8px 12px` | `4px` |
+
+> **宽度规则（1440px 分辨率）：**  
+> - 创建页、弹窗、抽屉：最小宽度 `256px`，元素间距 `20px`  
+> - 页面 widget / 紧凑表单：最小宽度 `160px`，元素间距 `16px`  
+> - 实际宽度随排版缩放，保持各元素间距比例不变
+
+**字体：** Inter Regular 14px / line-height 20px  
+**箭头图标：** `top bar-arrow-down`，尺寸 `20×20px`，展开时旋转 `180°`
+
+---
+
+## 三、触发器状态
+
+| 状态 | 背景色 | 边框 | 文字颜色 | 箭头 |
+|---|---|---|---|---|
+| **Default（默认）** | `#FFFFFF` | `1px solid #DEDFE3` | Placeholder: `#B2B2B8` | `#B2B2B8`（向下） |
+| **Hover（悬浮）** | `#FFFFFF` | `1px solid var(--pcv-brand)` | Placeholder: `#B2B2B8` | `var(--pcv-brand)`（向下） |
+| **Active / Focus（点击展开）** | `#FFFFFF` | `1px solid var(--pcv-brand)` | Placeholder: `#B2B2B8` | 旋转 180°（向上） |
+| **已选（有值）** | `#FFFFFF` | `1px solid #DEDFE3` | 已选值: `#66666C` | `#B2B2B8`（向下） |
+| **Disabled（禁用）** | `#F4F5F6` | `1px solid #DEDFE3` | `#B2B2B8` | `#B2B2B8`，不可点击 |
+| **Success（成功校验）** | `#FFFFFF` | `1px solid #28C76F` | `#66666C` | 向上 |
+| **Error（校验失败）** | `#FFFFFF` | `1px solid #EA5455` | `#EA5455` | 向下 |
+| **组合选择器** | `#FFFFFF` | 分段 `1px solid #D8D6DE` | Placeholder: `#B2B2B8` | 每段各自的箭头 |
+
+---
+
+## 四、下拉浮层容器
+
+与 Dropdown 规范一致：
+```css
+background: #FFFFFF;
+border-radius: 6px;               /* var(--radius-md) */
+box-shadow: 0 4px 14px 4px rgba(0, 0, 0, 0.06);
+padding: 6px 0;
+min-width: 与触发器等宽;
+max-width: 480px;                 /* 内容超长时浮窗最大宽 s120=480px */
+```
+
+> Dashboard widget 中：默认宽度 `240px`，超长时最大宽度 `480px`
+
+**文字溢出处理：**
+- 单行超长 → `text-overflow: ellipsis`，不换行
+- 特殊情况允许换行，但需保持与浮窗两侧间距 `12px`（s3）
+
+---
+
+## 五、单选下拉选项（el-option）
+
+| 状态 | 背景色 | 文字颜色 | 字重 |
+|---|---|---|---|
+| **默认 Default** | transparent | `#66666C` | Regular 400 |
+| **悬停 Hover** | `rgba(var(--pcv-brand-rgb), 0.15)` | `#66666C` | Regular 400 |
+| **已选择 Selected** | transparent | `var(--pcv-brand)` | **Medium 500** |
+| **禁用 Disabled** | transparent | `#B2B2B2` | Regular 400 |
+
+```css
+height: 40px;
+padding: 10px 12px;
+font: Inter Regular 14px / 20px;
+```
+
+> ⚠️ 注意：单选选项 hover 背景透明度为 **15%**（`rgba(brand, 0.15)`），比 Dropdown 命令菜单的 5% 更深，两者不同。
+
+---
+
+## 六、多选下拉选项（el-option with checkbox）
+
+```
+选项高度：40px
+内边距：10px 12px
+checkbox 容器：20×20px
+checkbox 内框：18×18px，border-radius: 3px
+文字与 checkbox 间距：8px（gap）
+```
+
+| 状态 | 背景色 | Checkbox 样式 | 文字颜色 |
+|---|---|---|---|
+| **未选** | transparent | `border: 1.5px solid #DEDFE3`，bg `#FFFFFF` | `#66666C` |
+| **悬停** | `rgba(brand, 0.15)` | `border: 1.5px solid var(--pcv-brand)` | `#66666C` |
+| **已选（Checked）** | transparent | bg `var(--pcv-brand)` + 白色勾 | `#66666C` |
+| **已选，禁用** | transparent | bg `#F4F5F6`，border `#DEDFE3` + 勾（灰色） | `#B2B2B2` |
+| **未选，禁用** | transparent | bg `#F4F5F6`，border `#DEDFE3` | `#B2B2B2` |
+
+---
+
+## 七、多选 Tag 显示
+
+当 `el-select` 为 `multiple` 模式时，已选项以 Tag 形式显示在触发器内：
+
+```
+Tag 高度：22px
+Tag 圆角：var(--radius-full) = 999px（圆角 Tag）
+Tag 内有可删除按钮：close 图标，16×16px
+Tags 之间间距：4px（s1）
+Tags 与容器左侧间距：12px（s3，与输入框 padding 一致）
+```
+
+**溢出处理（collapse-tags）：**
+- 超出显示不下时，折叠为 `Tag + "+N"` 数量标记
+- 数量标记样式：`tag/默认`（无 close 按钮），文字 `+N`
+- `collapse-tags-tooltip`：悬停数量标记时展示所有已选项的 tooltip 气泡
+
+---
+
+## 八、带标题的选择器（Label + Select）
+
+部分场景选择器上方有 Label 标题：
+```
+Label 字体：Inter Regular 14px，color: #66666C
+Label 到 Select 间距：4px（s1）
+```
+
+支持 Label 带文字提示（tooltip 图标），结构：`Label + ? icon + Select`
+
+---
+
+## 九、与 Element Plus 差异对比
+
+| 属性 | EP 默认 | Pacvue 规范 | 已 override |
+|---|---|---|---|
+| 触发器高度（normal） | `32px` | **36px** | ✅（需在 el-overrides.css 补充） |
+| 触发器高度（small） | `24px` | **32px** | ✅（需在 el-overrides.css 补充） |
+| 内边距 | `0 15px` | **8px 12px** | ✅ |
+| 边框颜色（Default） | `--el-border-color`（#DCDFE6） | `#DEDFE3` | ⚠️ 接近，token 映射后基本一致 |
+| Hover/Focus 边框 | `--el-color-primary` | `var(--pcv-brand)` | ⚠️ primary 已映射，自动生效 |
+| 禁用背景 | `--el-fill-color-light`（约 #F5F7FA） | `#F4F5F6` | ✅ 接近，已在 tokens 中覆盖 |
+| Placeholder 色 | `--el-text-color-placeholder`（#A8ABB2） | `#B2B2B8` | ✅ 需映射 |
+| Error 边框色 | `--el-color-danger`（#F56C6C） | `#EA5455` | ✅ 已在 tokens 中覆盖 |
+| 下拉选项高度 | ~34px | **40px** | ✅（已在 06-下拉项规范 override） |
+| 选项 hover 背景 | `primary-light-9` | **`rgba(brand, 0.15)`** | ✅（比 Dropdown 命令菜单的 0.05 更深） |
+| 已选项颜色 | `--el-color-primary` | `var(--pcv-brand)` + Medium 500 | ⚠️ 字重需额外设置 |
+| 多选 Checkbox 样式 | EP 内置 checkmark（无框） | **带明确边框的 checkbox** | ✅ 需 custom CSS |
+| 选项 padding | `0 20px` | **10px 12px** | ✅（el-select-dropdown padding 不同于 el-dropdown） |
+
+---
+
+## 十、CSS Override 参考（补充到 el-overrides.css）
+
+```css
+/* ===== Select Trigger ===== */
+.el-select .el-input__wrapper {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);     /* 4px */
+  box-shadow: 0 0 0 1px #dedfe3 inset;
+}
+
+.el-select .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--pcv-brand) inset;
+}
+
+.el-select .el-input.is-focus .el-input__wrapper {
+  box-shadow: 0 0 0 1px var(--pcv-brand) inset;
+}
+
+.el-select .el-input.is-disabled .el-input__wrapper {
+  background-color: #f4f5f6;
+  box-shadow: 0 0 0 1px #dedfe3 inset;
+}
+
+/* Small size */
+.el-select.el-select--small .el-input__wrapper {
+  height: 32px;
+}
+
+/* Placeholder */
+.el-select .el-input__placeholder,
+.el-select .el-input__inner::placeholder {
+  color: #b2b2b8;
+  font-size: 14px;
+}
+
+/* Selected value text */
+.el-select .el-input__inner {
+  color: #66666c;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Arrow icon color */
+.el-select .el-input__suffix .el-icon {
+  color: #b2b2b8;
+}
+.el-select:hover .el-input__suffix .el-icon,
+.el-select .el-input.is-focus .el-input__suffix .el-icon {
+  color: var(--pcv-brand);
+}
+
+/* Error state */
+.el-select .el-input.is-error .el-input__wrapper {
+  box-shadow: 0 0 0 1px #ea5455 inset;
+}
+.el-select .el-input.is-error .el-input__inner {
+  color: #ea5455;
+}
+
+/* ===== Select Options ===== */
+.el-select-dropdown__item {
+  height: 40px;
+  padding: 10px 12px;               /* Note: 12px left padding (not 20px like el-dropdown) */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #66666c;
+}
+
+.el-select-dropdown__item:hover:not(.is-disabled) {
+  background: rgba(var(--pcv-brand-rgb), 0.15);   /* 15% — deeper than command dropdown's 5% */
+  color: #66666c;
+}
+
+.el-select-dropdown__item.selected,
+.el-select-dropdown__item.is-selected {
+  color: var(--pcv-brand);
+  font-weight: 500;
+  background: transparent;
+}
+
+/* Multi-select checkbox in option */
+.el-select-dropdown__item.is-selected::after {
+  display: none;                    /* Remove EP's default checkmark */
+}
+
+/* ===== Multi-select Tags ===== */
+.el-select .el-tag {
+  height: 22px;
+  border-radius: var(--radius-full);
+  margin: 2px;
+}
+.el-select .el-tag .el-icon {
+  font-size: 14px;
+}
+```
+
+---
+
+## 十一、使用规则摘要
+
+```
+表单选择场景（有值绑定）：
+  ├── 单选，选项 ≤ 5 → el-select（单选）
+  ├── 单选，选项多，需搜索 → el-select filterable
+  ├── 多选，有 Tag 显示 → el-select multiple + collapse-tags
+  └── 层级选择 → el-cascader（另行规范）
+
+非表单场景（操作命令）→ el-dropdown（见 06-下拉项规范）
+
+尺寸选用：
+  ├── 创建页 / 弹窗 / 抽屉 → height: 36px，min-width: 256px
+  └── Widget / 紧凑表单 → height: 32px，min-width: 160px
+```

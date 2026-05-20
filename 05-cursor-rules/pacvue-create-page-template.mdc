@@ -1,0 +1,202 @@
+---
+description: Pacvue Create Page Template — 创建流程布局规范，M/L/XL三种档位，适用所有创建/编辑页
+alwaysApply: true
+---
+
+# Pacvue Create Page Template
+
+所有创建（Create）和编辑（Edit）页，必须从以下三种档位中选择一种。
+**不允许自定义宽度**。拿到 PRD 后，根据内容复杂度和场景自行判断使用哪种档位。
+
+---
+
+## 核心设计原则（来自官方 Design System）
+
+1. **整体布局居中** — 内容区域水平居中于 `calc(100vw - 62px)`（减去侧边栏宽度）
+2. **CTA 按钮位置稳定** — 同一流程内，模块卡片无论增减，按钮栏位置不变（固定在底部）
+3. **标准档位，不任意自定义** — 只从 M / L / XL 三档中选
+4. **响应式，线性增长** — 在视窗变宽时，内容区随比例增长
+5. **最大宽度上限 1500px** — 整体内容容器（白色区域）最宽不超过 1500px
+
+---
+
+## 档位规范表
+
+| 档位 | 表单内容宽 | 布局结构 | 典型场景 |
+|------|-----------|---------|---------|
+| **M** | **720px** | 纯单列表单，无步骤条，无右侧面板 | 大多数创建页默认；字段少、流程简单 |
+| **L** | **960px** | 左侧步骤条 + 中心表单 | 内容较多、分组复杂；如创建 Rule、Report |
+| **XL** | **1330px** | 左侧步骤条 + 中心表单 + 右侧信息面板；或纯大型多列表单 | 含预览区/表格/可视化操作；如创建 Campaign、Ad |
+
+---
+
+## M 档 — 单列表单（720px）
+
+**适用判断：**
+- 表单字段 ≤ 8 个
+- 无复杂分组（最多 1-2 个 section）
+- 无步骤拆分需求
+- 无预览区、无右侧信息面板
+
+**页面结构：**
+```
+[Sidebar 62px]  [Main Area = 100vw - 62px]
+                ┌──────────────────────────────────────┐
+                │ Top Nav 56px (brand color)            │
+                ├──────────────────────────────────────┤
+                │ Breadcrumb Bar 56px (white, shadow)   │
+                │   Icon  Parent > Current (18px)       │
+                ├──────────────────────────────────────┤
+                │ Page bg #f2f3f6  pt-16px px-24px      │
+                │      ┌─────── Card (720px) ────────┐  │
+                │      │ white · radius 6px          │  │
+                │      │ padding: 24px               │  │
+                │      │ form fields (full width)... │  │
+                │      └─────────────────────────────┘  │
+                │                                       │
+                │ ┌──── Footer Bar (full width) ──────┐ │
+                │ │ 64px · white · shadow             │ │
+                │ │ justify: flex-end · gap: 20px     │ │
+                │ │         [Cancel]  [Primary CTA]   │ │
+                │ └───────────────────────────────────┘ │
+                └──────────────────────────────────────┘
+```
+
+**关键尺寸：**
+- 表单卡片宽度：`720px`，水平居中
+- 卡片：`bg: white`，`border-radius: 6px`，`padding: 24px`，无 box-shadow，无 border
+- 页面背景：`#f2f3f6`
+- 内容区 padding：`pt-16px px-24px`
+- Footer：`height: 64px`，`bg: white`，`box-shadow: 0 4px 24px rgba(0,0,0,0.06)`，右对齐按钮
+- Footer 按钮间距：`gap: 20px`
+- 按钮尺寸：`height: 36px`，`min-width: 88px`，`border-radius: 4px`
+
+**面包屑 Bar（不是独立的 h1 标题）：**
+- 高度：`56px`，`bg: white`，`box-shadow: 0 2px 4px rgba(228,228,228,0.5)`
+- 内容：`{Pacvue Icon}  {父级页名称} > {当前页名称}`
+- 父级页名称：`18px / font-weight:500 / color:#66666c`
+- 当前页名称：`18px / font-weight:600 / color:#45464f`
+- 分隔符 `>` 用 Pacvue 图标，不用文字 `>`
+- **无单独的大标题行（h1）和副标题（subtitle paragraph）**
+
+---
+
+## L 档 — 步骤条 + 表单（960px）
+
+**适用判断：**
+- 表单字段较多（> 8 个），或需要分步骤引导
+- 有明确的多步骤流程（2-5 步）
+- 无预览区/可视化区域
+
+**页面结构：**
+```
+                ┌──────────────────────────────────────────┐
+                │ Top Nav 56px                              │
+                ├──────────────────────────────────────────┤
+                │ Breadcrumb Bar 56px                       │
+                ├──────────────────────────────────────────┤
+                │ Page bg #f2f3f6                           │
+                │  ┌── Stepper ──┬──── Form Card ────────┐  │
+                │  │ (left, ~    │  (960px 含步骤条宽度)  │  │
+                │  │  fixed w)   │  padding: 24px         │  │
+                │  └─────────────┴────────────────────────┘  │
+                │                                            │
+                │ ┌──── Footer Bar (full width) ───────────┐ │
+                └──────────────────────────────────────────┘
+```
+
+> _(详细步骤条样式待用户提供案例后补充)_
+
+---
+
+## XL 档 — 步骤条 + 表单 + 右侧面板（1330px）
+
+**适用判断（任一满足）：**
+- 含预览区（实时预览 ad、规则等）
+- 含数据表格类操作（如批量添加）
+- 需要右侧持续显示提示/汇总信息
+- 大型多列纯表单（字段极多，横向铺开更合理）
+
+**页面结构：**
+```
+                ┌─────────────────────────────────────────────────────┐
+                │ Top Nav 56px                                         │
+                ├─────────────────────────────────────────────────────┤
+                │ Breadcrumb Bar 56px                                  │
+                ├─────────────────────────────────────────────────────┤
+                │ Page bg #f2f3f6                                      │
+                │  ┌─ Stepper ─┬──── Form Card ──────┬── Info Panel ─┐ │
+                │  │           │   (主内容区域)       │  (右侧固定)   │ │
+                │  │           │                     │               │ │
+                │  └───────────┴─────────────────────┴───────────────┘ │
+                │                                                      │
+                │ ┌──── Footer Bar (full width) ─────────────────────┐ │
+                └─────────────────────────────────────────────────────┘
+```
+
+> _(详细右侧面板样式待用户提供案例后补充)_
+
+---
+
+## AI 判断规则 — 拿到 PRD 后如何选择档位
+
+```
+if (字段数 ≤ 8 && 无步骤分拆 && 无预览区) → M (720px)
+else if (字段数 > 8 || 有2+步骤 || 内容分组复杂) && 无预览区 → L (960px)  
+else if (有预览区 || 有可视化 || 有右侧汇总 || 字段极多需多列) → XL (1330px)
+```
+
+**Catalog Create 页判断：** 共 4 个字段（Catalog Name、Reddit Pixel、Language、Currency）+ Product Source，流程简单无步骤 → **选 M (720px)**
+
+---
+
+## 页面标题区规范（仅两种形式，必须二选一）
+
+### Type 1 — 一级标题（无父级路径）
+
+适用：该页面本身就是模块根级，无上级页面可返回。
+
+```
+白色 bar，padding: 16px 24px，box-shadow: 0 2px 4px rgba(228,228,228,0.5)
+标题文字：20px / font-weight:600 / color:#45464f / line-height:24px
+不含图标、不含箭头
+```
+
+### Type 2 — 多层级标题（含父级面包屑路径）
+
+适用：从列表页进入创建/编辑/详情页时。例：Catalogs > Create Catalog
+
+```
+高度：56px，padding: 14px 24px，box-shadow: 0 2px 4px rgba(228,228,228,0.5)
+布局（左→右，gap: 8px）：
+  {模块图标 24px}  {父级名称}  {chevron-right 16px}  {当前页标题}
+
+父级名称：18px / font-weight:500 / color:#66666c
+箭头图标：Pacvue chevron-right，16×16px，color:#66666c
+当前页标题：20px / font-weight:600 / color:#45464f
+```
+
+**两种类型共同规则：**
+- white bg，sticky，`top: 56px`（top-nav 高度），`z-index: 80`
+- **绝对不允许**在此 bar 下方再添加独立的 h1、subtitle、description 段落
+
+---
+
+## Footer 规范
+
+- **位置**：`position: fixed; bottom: 0; left: 62px;`（固定在浏览器视口最底部）
+- **层级**：`z-index: 200`（高于表单、高于 sticky 标题栏）
+- **尺寸**：`height: 64px`，`width: calc(100vw - 62px)`
+- **样式**：`background: #fff`，`box-shadow: 0 -2px 8px rgba(0,0,0,0.06)`
+- **按钮**：右对齐，`gap: 20px`，`height: 36px`，`min-width: 88px`，`border-radius: 4px`
+- **内容区补偿**：page-content 必须加 `padding-bottom: 80px` 防止内容被遮挡
+
+---
+
+## 共同规则（所有档位适用）
+
+- Sidebar：`62px`，`bg: var(--pcv-nav-bg)` (`#12143C` 蓝色主题)
+- Top Nav：`56px`，`bg: var(--pcv-brand)`，白色文字
+- 页面背景：`#f2f3f6`
+- 卡片：白色，无 border，无 box-shadow，`border-radius: 6px`
+- 主要按钮文案：严格按 PRD 要求（Create / Save Changes / Next 等）
