@@ -1,688 +1,154 @@
 ---
-description: Pacvue 表格（Table）组件规范——页面布局、区域结构、行高、列头、单元格类型、多选行为、行状态、操作栏、筛选栏、分页、与 Element Plus 差异 check
+description: Pacvue 表格（Table）AI 代码生成速查——区域结构、行高、固定列、多选联动、Toolbar、EP override。完整规范见 04-areas/。
 globs: ["**/*.vue", "**/*.html", "**/*.css"]
 alwaysApply: false
 ---
 
-# 10 · 表格规范（Table）
+# 10 · 表格规范（Table）速查
 
-> 数据来源：  
-> - `19120-18385`（多选交互 & 行列样式）  
-> - `11255-130924`（页面内表格布局 & 操作栏 & 筛选栏 & 分页器）  
-> 项目中使用 `surely-table`（Pacvue 自研）或 `el-table`，两者共用本规范。
-
----
-
-## 一、页面内表格完整布局
-
-### 1.1 总体原则（来自 Figma 标注）
-> 基础表格布局包括："**筛选、操作、滚动条、表格、分页**"等组件；  
-> 基础表格**左右边距为 24px**；  
-> 各组件**上下之间无间距**（zero vertical gap）。
-
-### 1.2 完整区域从上到下
-
-```
-┌──────────────────────────────────────────────────────────┐ ← 筛选栏 Filter Bar（自适应高度）
-│  [Filters] [Custom]  Vendor ↓  Campaign Name...  [Search]│   px: 24px，无固定高
-├──────────────────────────────────────────────────────────┤ ← 操作栏 Toolbar（68px）
-│  [+ Create]  [⚙ Bulk Target]  [Bulk Op ↓]   <>👁|💾⬇☰  │   border-top: 1px solid #EDEEF1
-├──────────────────────────────────────────────────────────┤ ← 水平滚动条（16px，仅列超宽时出现）
-├──────────────────────────────────────────────────────────┤ ← 表头 Header（48px）
-│  ☑  Campaign ↕   State ↕  Type ⓘ ↕  Budget ⓘ ↕   ⋮   │
-├──────────────────────────────────────────────────────────┤
-│  ☐  Brand-SP-PAT...  ● Enabled↓  SP  Up&down  $234  ⋮   │ ← 数据行（52px）
-│  ...                                                     │
-├──────────────────────────────────────────────────────────┤
-│     Total                                    $234  310.4K│ ← 汇总行（52px）
-├──────────────────────────────────────────────────────────┤ ← 分页器 Pagination（64px，固定底部）
-│  Total 100 entries, 10/page   < 1 2 3 [4] 5 6 ... 1000 >│
-└──────────────────────────────────────────────────────────┘
-```
-
-| 区域 | 高度 | 背景 | 说明 |
-|---|---|---|---|
-| **筛选栏 Filter Bar** | 自适应 | `#FFFFFF` | 多行筛选条件，含 Search 按钮 |
-| **操作栏 Toolbar** | **68px** | `#FFFFFF` | 左：数据操作；右：工具图标 |
-| **水平滚动条** | **16px** | `#D2D4D9` | 仅列超宽时出现，位于 Header 上方 |
-| **表头 Header** | **48px** | `#FFFFFF` | 列标题+排序+提示图标 |
-| **数据行 Data Row** | **52px** | `#FFFFFF` | 主体数据（多行内容自动撑高） |
-| **汇总行 Total** | **52px** | `#FFFFFF` | 粗体数字汇总 |
-| **分页器 Pagination** | **64px** | `#FFFFFF` | 固定在表格底部 |
+> 完整规范：
+> - Toolbar → `04-areas/toolbar-area.md`
+> - 水平滚动条 → `04-areas/scrollbar-area.md`
+> - 表格本体 → `04-areas/table-area.md`
+>
+> 数据来源：Figma `wgvYWGdj9Bfq2HSEpRbnLN`，节点 `19120-18385`、`11255-130924`
 
 ---
 
-## 二、操作栏 Toolbar（68px）
-
-### 2.1 布局规则
-```css
-height: 68px;
-padding: 16px 24px;           /* 上下 16px，左右 24px */
-display: flex;
-align-items: center;
-justify-content: space-between;
-border-top: 1px solid #EDEEF1;
-background: #FFFFFF;
-```
-
-> **左侧** = 对表格内数据的操作（新建、批量操作等）  
-> **右侧** = 对表格不造成数据影响的操作（设置、下载、查看图表、查看记录等）
-
-### 2.2 左侧按钮规范
-
-| 类型 | 背景 | 边框 | 文字色 | 状态 |
-|---|---|---|---|---|
-| **主要按钮**（Create） | `#FF9F43` | 无 | `#FFFFFF` | 有数据时默认显示 |
-| **次要按钮**（Bulk Target） | 透明 | `1px solid #FF9F43` | `#FF9F43` | 有数据时默认显示 |
-| **灰色禁用按钮**（Bulk Op） | `rgba(#82858B, 0.05)` | `1px solid #DEDFE3` | `#B2B2B8` | **无选中行**时显示 |
-| **品牌色边框按钮**（Bulk Op 激活） | 透明 | `1px solid var(--pcv-brand)` | `var(--pcv-brand)` | **有选中行**时激活 |
-
-所有按钮：
-```css
-height: 36px;
-padding: 10px 20px;
-border-radius: 4px;
-font: Inter Medium 14px;
-gap: 8px;           /* 按钮与图标间距 */
-```
-
-左侧按钮间距：`gap: 16px`
-
-### 2.3 右侧工具图标规范
+## 完整区域结构（从上到下，各区零间距）
 
 ```
-[show full number] [👁 visibility]  |  [💾 save] [⬇ download] [☰ custom columns]
-                                   ↑
-                            分隔线：2px × 24px，#D2D4D9，border-radius: 2px
+筛选栏 Filter Bar   → 自适应高度，padding: 16px 24px
+操作栏 Toolbar      → 68px，border-bottom: 1px solid #EDEEF1
+水平滚动条          → 16px，仅列超宽时出现
+表头 Header         → 48px，sticky
+数据行 Data Row     → 52px（最小），hover/selected 品牌色背景
+汇总行 Total        → 52px，font-weight: 600
+分页器 Pagination   → 64px，border-top: 1px solid #EDEEF1
 ```
-
-```css
-/* 右侧图标容器 */
-display: flex;
-align-items: center;
-gap: 16px;
-
-/* 每个图标 */
-width: 24px;
-height: 24px;
-color: #66666C;   /* 默认图标色 */
-```
-
-图标悬浮/激活时变为 `var(--pcv-brand)` 色。
 
 ---
 
-## 三、筛选栏 Filter Bar（自适应高度）— Figma `7347:114153`
-
-### 3.1 视觉结构
-```
-[Filters] [Custom]  |  Vendor ↓  |  Vendor ↓  |  ...     
-Campaign Name  "Contains(and)" ↓  Dial Corporation ↓  |  Campaign Tag + Add Tag ↓
-Vendor | Dial Corp ↓  |  Vendor ↓  |  Monthly Sale Units ↓  |  🔍 Search ASIN
-                                                          [🔍 Search]  [⚙]
-```
-
-### 3.2 布局规则（核心）
+## Toolbar 速查
 
 ```css
-/* 外层容器 */
-.filter-bar {
+.toolbar {
+  height: 68px;
+  padding: 0 24px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;  /* 让 Search+Clear 行自动右对齐 */
-  gap: 16px;
-  padding: 16px 24px;
-}
-
-/* 筛选条件区：4列等宽 grid，撑满全宽 */
-.filter-conditions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.filter-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);  /* 4列等宽 */
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #edeef1;
 }
 ```
 
-### 3.3 规范要点
-
-| 元素 | 规范 |
-|---|---|
-| **[Filters] + [Custom]** | 共占 1 格（1/4），内部再 `grid 1fr 1fr` 均分；`border: 1px solid var(--pcv-brand)`，`radius: 4px` |
-| **普通条件框** | `height: 36px`，`border: 1px solid #DEDFE3`，`radius: 4px`，宽度 = 1/4 等宽格；Label（Medium #45464F）\| 分隔线（1px #DEDFE3 16px）\| Value（Regular #66666C 或 #B2B2B8）\| ↓ 箭头 |
-| **Search 按钮** | `height: 36px`，`bg: var(--pcv-brand)`，`radius: 6px`（注意：比条件框大 2px），`color: #FBFBFB` |
-| **Clear/Reset 图标按钮** | `36×36px`，`border: 1px solid #DEDFE3`，`radius: 6px`，灰色图标 |
-| **Search + Clear 行** | 独占最后一行，**右对齐**（由 `align-items: flex-end` 控制），`gap: 16px` |
-| **条件框内部 gap** | `padding: 0 12px`；Label 与分隔线、分隔线与 Value 之间**无额外 gap**（紧贴） |
-- 筛选栏与操作栏之间**无间距**（margin/gap: 0）
-
----
-
-## 四、水平滚动条（16px）
-
-```css
-height: 16px;
-background: #D2D4D9;    /* 滚动条轨道/滑块色 */
-/* 位于 Toolbar 下方、表头上方 */
-/* 仅当表格列总宽 > 可视区域宽度时出现 */
-```
-
-> 规范说明：横向滚动条在表格明细**外侧**（Header 上方），以防止遮挡第一行数据。
-
----
-
-## 五、表头（Header）规范
-
-### 尺寸 & 布局
-```css
-height: 48px;
-background: #FFFFFF;
-border-bottom: 1px solid #EDEEF1;
-padding: 0;           /* 内容由 cell 各自控制 padding */
-```
-
-### 表头单元格内容元素
-
-| 元素 | 尺寸 | 位置/说明 |
-|---|---|---|
-| 多选框（Checkbox） | `20×20px` | `left: 24px`，第一列 |
-| 列标题文字 | Inter Medium/Regular 14px，`#45464F` | `left: 16px`（或 24px 多选列） |
-| 排序图标（chevron double） | `12×12px` × 2（上下），frame `12×24px` | 列标题右侧 |
-| 提示图标（tips-exclamation） | `18×18px` | 紧跟列标题右侧 |
-| 操作菜单图标（更多） | `24×24px` | 最后一列居中 |
-
-### 排序图标组合
-```
-   ↑  ← chevron-up（上箭头）    12×12px
-   ↓  ← chevron-down（下箭头） 12×12px
-```
-两个图标竖排叠放在 `12px宽 × 24px高` 的 Frame 内。  
-未排序：双箭头均灰色；排序中：激活箭头变为 `var(--pcv-brand)` 色。
-
----
-
-## 六、数据行（Data Row）规范
-
-### 尺寸
-```css
-min-height: 52px;     /* 单行文本内容 */
-/* 多行内容时行高自动撑开，保持 padding: 6px 0（上下各6px） */
-border-bottom: 1px solid #EDEEF1;
-```
-
-### 行背景状态
-
-| 状态 | 背景色 | 触发条件 |
-|---|---|---|
-| **Default** | `#FFFFFF` | 普通未选中行 |
-| **Hover** | `rgba(var(--pcv-brand-rgb), 0.04)` | 鼠标悬浮 |
-| **Selected（已选）** | `rgba(var(--pcv-brand-rgb), 0.06)` | checkbox 已勾选 |
-| **Expand（展开行）** | `#FAFAFA` | 展开的子内容区 |
-
-### 单元格内边距
-```css
-/* 普通文字列 */
-padding: 0 16px;
-
-/* 第一列（含 checkbox 的 Name 列） */
-padding: 0 0 0 24px;   /* checkbox left 24px */
-
-/* 最后列（更多 ⋮） */
-padding: 0;   /* 图标居中，列宽 55px */
-```
-
----
-
-## 七、特殊单元格类型
-
-### 4.1 多选框列（Checkbox Column）
-```
-第一列宽度：≥ 280px（含 Name 内容）
-Checkbox：20×20px，left: 24px，vertically centered
-```
-- 未选：`border: 1.5px solid #DEDFE3`，白色背景
-- 已选：`background: var(--pcv-brand)`，白色勾，`border-radius: 3px`
-
-### 4.2 状态指示点（Status Dot）
-```
-尺寸：12×12px 圆（Ellipse）
-颜色：
-  Active / 正常：#28C76F（绿色，成功色）
-  Paused / 暂停：#82858B（灰色，中性色）
-  Error：#EA5455（红色）
-  Warning：#FF9F43（橙色）
-配合 chevron-down 小箭头，支持点击切换状态
-布局：[●] [↓]，间距约 4px
-```
-
-### 4.3 操作更多列（Actions Column）
-```css
-width: 55px;
-/* 更多图标 */
-icon: "更多"（三点 ⋮）;
-size: 24×24px;
-position: center;
-```
-仅在 hover 行时高亮显示，点击弹出操作菜单（el-dropdown）。
-
-### 4.4 带 Tooltip 的列（ⓘ 图标）
-- `tips-exclamation` 图标，`18×18px`，跟在列标题文字右侧
-- 也可出现在数据行内（$234 ⓘ 格式）
-
-### 4.5 货币/数值列
-- 文字右对齐（`text-align: right`）
-- 格式：`$234`、`310.4K`
-- 汇总行加粗
-
-### 4.6 汇总行（Total/Footer Row）
-```css
-min-height: 52px;
-font-weight: 600;
-color: #45464F;
-border-top: 1px solid #EDEEF1;
-background: #FFFFFF;
-/* "Total" 文字在第一数据列左对齐 */
-```
-
----
-
-## 八、多选行为（Bulk Selection）
-
-### 三阶段状态
-
-| 状态 | 表头 Checkbox | 触发 |
-|---|---|---|
-| **全部未选** | 空框 `border: 1.5px solid #DEDFE3` | 初始状态 |
-| **部分选中（Indeterminate）** | 短横线 `—`，`background: var(--pcv-brand)` | 选中部分行 |
-| **全选当前页** | 勾选 ✓，`background: var(--pcv-brand)` | 点击 Select Current Page |
-
-### 点击表头 Checkbox 的下拉菜单
-
-当表头 checkbox 处于 Checked 或 Indeterminate 时，点击会弹出下拉菜单（左对齐浮层）：
-
-```
-┌─────────────────────┐
-│ Select All Page      │  ← 选择所有分页数据
-│ Select Current Page  │  ← 选择当前页（高亮态：var(--pcv-brand) 文字）
-│ Deselect All         │  ← 取消全选
-└─────────────────────┘
-```
-
-下拉菜单样式遵循「下拉项规范（06）」，已选项文字 `var(--pcv-brand)`，Medium 500。
-
-### Toolbar 状态联动
-- 有选中行时，Toolbar 出现 **Bulk Operation ↓** 按钮（边框型，品牌色）
-- 无选中时，隐藏批量操作按钮
-
----
-
-## 九、分页器（Pagination）规范
-
-```css
-height: 64px;
-padding: 0 24px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-border-top: 1px solid #EDEEF1;
-background: #FFFFFF;
-```
-
-**显示逻辑（来自 Figma 标注）：**
-- 当数据量大、需分页时，分页器固定在表格底部，跟随表格
-- 切换每页展示数量后：若当前页数据 ≤ 每页数量，**分页器消失**，只保留"每页数量"切换器
-- 查看至最后一页：若最后页数量 ≤ 每页数量，**分页器不消失**（保留供用户感知当前位置）
-
-**分页器样式（参考截图）：**
-```
-Total 100 entries,  10/page ↕   |  ‹  1  2  3  [4]  5  6  ...  1000  ›  |  Go to page [ 1 ]
-```
-- 当前页码：`border: 1px solid var(--pcv-brand)`，`color: var(--pcv-brand)`
-- 普通页码：`color: #66666C`，hover 变 `var(--pcv-brand)`
-- 每页数量下拉：`height: 36px`，含 ↕ 上下箭头
-
----
-
-## 十、Widget 中的表格
-
-Widget 模式下的表格为紧凑布局：
-- 外容器有圆角卡片样式（`border-radius: 6px`，`box-shadow`）
-- 右上角有**图表/列表切换图标**（`36×36px` 按钮组）
-- 标题区：Title（Medium/Bold）+ 副标题（小字）
-- 表格内容同样遵循 48px 表头 / 52px 行高规范，但整体宽度较小
-
----
-
-## 十一、颜色 Token 汇总（表格专用）
-
-| Token | 值 | 用途 |
-|---|---|---|
-| 表格/分割线 | `#EDEEF1` | Header border、Row border、各区域分隔 |
-| 表格/滚动条 | `#D2D4D9` | 水平滚动条颜色 |
-| 禁用按钮边框 | `#DEDFE3` | Bulk Op 禁用状态 |
-| 禁用按钮文字 | `#B2B2B8` | Bulk Op 禁用状态 |
-| 禁用按钮背景 | `rgba(#82858B, 0.05)` | Bulk Op 禁用状态 |
-| 操作图标默认 | `#66666C` | 右侧工具图标 |
-| 图标分隔线 | `#D2D4D9` | 右侧工具图标区分隔线 |
-
----
-
-## 七、列宽参考
-
-| 列类型 | 典型宽度 | 说明 |
-|---|---|---|
-| Name（主标题列） | **280px** | 含 checkbox，flex 自适应 |
-| 状态（State/Type） | **88~120px** | 状态点 + 小文字 |
-| 文字描述列 | **110~149px** | 策略/方式等 |
-| 数值列（Budget/Impr./Clk./CTR） | **106~149px** | 数字右对齐 |
-| 操作列（Actions ⋮） | **55px** | 固定宽，不可伸缩 |
-
----
-
-## 八、水平滚动条
-
-```css
-height: 16px;
-/* 位于 Toolbar 下方，Header 上方 */
-background: #F2F3F6;  /* 或系统默认 */
-```
-
-滚动条在内容超宽时出现，表头固定（sticky）不随滚动移动。
-
----
-
-## 十二、与 Element Plus 差异对比
-
-| 属性 | EP 默认 | Pacvue 规范 | override 建议 |
+| 按钮类型 | 背景 | 边框 | 文字 |
 |---|---|---|---|
-| 表头高度 | ~40px（EP auto） | **48px** | ✅ 需 override `--el-table-header-height` 或 td padding |
-| 数据行高度 | ~40px | **52px** | ✅ 需 override（padding 增加） |
-| 表头背景 | `--el-fill-color-light`（淡灰） | **`#FFFFFF`（白色）** | ✅ 需 override |
-| 表头文字色 | `--el-text-color-secondary` | `#45464F` | ✅ 精确对齐 |
-| 行文字色 | `--el-text-color-regular` | `#66666C` | ⚠️ 已映射 |
-| 分隔线颜色 | `--el-border-color-lighter` | `#EDEEF1` | ✅ 需 override |
-| Hover 行背景 | `--el-fill-color` | `rgba(brand, 0.04)` | ✅ 需 override |
-| 选中行背景 | `--el-color-primary-light-9` | `rgba(brand, 0.06)` | ✅ 已近似（light-9 = 10%） |
-| Checkbox 选中色 | `--el-color-primary` | `var(--pcv-brand)` | ⚠️ primary 已映射 |
-| 排序激活色 | `--el-color-primary` | `var(--pcv-brand)` | ⚠️ primary 已映射 |
-| 行 padding（cell） | `5px 12px` | `0 16px`（高度由行高保证） | ✅ 需 override |
+| Primary（Create） | `var(--pcv-brand)` | 无 | `#fff` |
+| Secondary | 透明 | `1px solid var(--pcv-brand)` | `var(--pcv-brand)` |
+| Disabled（Bulk Op）| `rgba(130,133,139,.05)` | `1px solid #DEDFE3` | `#B2B2B8` |
+| Active（Bulk Op） | 透明 | `1px solid var(--pcv-brand)` | `var(--pcv-brand)` |
+
+右侧图标：`24×24px`，`#66666C`，hover → `var(--pcv-brand)`；分隔线 `2px×24px #D2D4D9`
 
 ---
 
-## 十三、CSS Override 参考（el-overrides.css）
+## 表格尺寸速查
+
+| 元素 | 高度 | 说明 |
+|---|---|---|
+| Header | 48px | sticky，白底 |
+| Data Row | 52px | hover `rgba(brand,0.04)`，selected `rgba(brand,0.06)` |
+| Total Row | 52px | `font-weight: 600` |
+
+列宽参考：Name ≥ 280px，状态列 88~120px，数值列 106~149px（右对齐），操作列 55px
+
+---
+
+## 固定列关键规则
+
+⚠️ **固定列背景必须用 `color-mix`，不能用 `rgba`（会透视后面列文字）**
 
 ```css
-/* ===== Table Structure ===== */
+/* ✅ 正确 */
+tr:hover td.sticky {
+  background: color-mix(in srgb, var(--pcv-brand) 4%, #ffffff);
+}
+tr.selected td.sticky {
+  background: color-mix(in srgb, var(--pcv-brand) 6%, #ffffff);
+}
 
-/* 表头：白底，48px 行高 */
+table { border-collapse: separate; border-spacing: 0; }
+```
+
+阴影：左固定列 `box-shadow: 10px 0 14px 0 rgba(0,0,0,0.06)`；右固定列 `-10px 0 14px 0 rgba(0,0,0,0.06)`
+
+---
+
+## 多选联动速查
+
+- 空框 → 全选当前页（弹出菜单：Select All Page / Select Current Page / Deselect All）
+- 有选中行 → Toolbar Bulk Op 激活为品牌色边框
+- Checkbox 已选：`background: var(--pcv-brand)`，圆角 3px
+
+---
+
+## Element Plus 关键 Override
+
+```css
+/* 表头白底 48px */
 .el-table th.el-table__cell {
-  background: #ffffff;
-  height: 48px;
-  padding: 0;
-  color: #45464f;
-  font-size: 14px;
-  font-weight: 500;
+  background: #ffffff; height: 48px; padding: 0;
+  color: #45464f; font-size: 14px; font-weight: 500;
   border-bottom: 1px solid #edeef1;
 }
+.el-table th.el-table__cell .cell { padding: 0 16px; line-height: 48px; }
 
-/* 表头内容区：左 padding */
-.el-table th.el-table__cell .cell {
-  padding: 0 16px;
-  line-height: 48px;
-}
-
-/* 数据行：52px 高，白底 */
+/* 数据行 52px */
 .el-table td.el-table__cell {
-  height: 52px;
-  padding: 0;
-  border-bottom: 1px solid #edeef1;
-  color: #66666c;
-  font-size: 14px;
+  height: 52px; padding: 0;
+  border-bottom: 1px solid #edeef1; color: #66666c; font-size: 14px;
 }
+.el-table td.el-table__cell .cell { padding: 0 16px; line-height: 20px; }
 
-.el-table td.el-table__cell .cell {
-  padding: 0 16px;
-  line-height: 20px;
-}
-
-/* 行 hover */
+/* hover / selected */
 .el-table--enable-row-hover .el-table__body tr:hover > td {
   background: rgba(var(--pcv-brand-rgb), 0.04);
 }
-
-/* 选中行背景 */
-.el-table__body tr.current-row > td,
 .el-table__body tr.el-table__row--selected > td {
   background: rgba(var(--pcv-brand-rgb), 0.06);
 }
 
-/* 移除 EP 默认表头浅灰背景 */
-.el-table__header-wrapper,
-.el-table__fixed-header-wrapper {
-  background: #ffffff;
-}
-
-/* 排序图标激活色 */
-.el-table .ascending .sort-caret.ascending,
-.el-table .descending .sort-caret.descending {
-  border-bottom-color: var(--pcv-brand);
-  border-top-color: var(--pcv-brand);
-}
-
-/* 分隔线 */
-.el-table::before,
-.el-table--border::after {
-  background: #edeef1;
-}
-
-.el-table--border td,
-.el-table--border th {
-  border-right: 1px solid #edeef1;
-}
-```
-
----
-
-## 十四、固定列与横向滚动规范（Frozen Columns）
-
-> 数据来源：Figma `wgvYWGdj9Bfq2HSEpRbnLN` 节点 `11255-163019`
-
-### 14.1 触发条件
-
-当表格总列宽 > 可用容器宽度时，**自动开启横向滚动**。此时：
-
-- **左侧固定列**（Checkbox + 第一内容列）永远可见，固定在左侧
-- **右侧固定列**（Action 操作列，宽 `32px`）永远可见，固定在右侧
-- **中间列**在水平方向自由滚动
-
-### 14.2 阴影规则（Figma 实测）
-
-| 列 | 阴影方向 | 阴影值 |
-|---|---|---|
-| **左固定列**（右侧阴影）| 向右投射 | `box-shadow: 10px 0 14px 0 rgba(0,0,0,0.06)` |
-| **右固定列**（左侧阴影）| 向左投射 | `box-shadow: -10px 0 14px 0 rgba(0,0,0,0.06)` |
-
-- 阴影**仅在发生横向滚动时出现**（初始位置 / 已滚到端点时，对应端阴影消失）
-- 右侧 Action 列阴影在 Figma 中已明确标注：`shadow-[-10px_0px_14px_0px_rgba(0,0,0,0.06)]`
-
-### 14.3 固定列尺寸规范
-
-| 区域 | 宽度 | 内容 |
-|---|---|---|
-| **左固定列**（Checkbox + 第一列合并）| `≥ 280px`（按内容定，最小 280px）| Checkbox（20×20px）+ 主要名称文字 |
-| **右固定列**（Action 列）| **`32px`** | `⋮` 更多菜单图标（24×24px）居中 |
-
-### 14.4 Element Plus 实现（el-table）
-
-```html
-<el-table :data="tableData" style="width: 100%" class="pcv-table">
-  <!-- 左固定：checkbox（EP 自带，fixed="left" 第一列） -->
-  <el-table-column type="selection" width="40" fixed="left" />
-
-  <!-- 左固定：第一内容列 -->
-  <el-table-column prop="name" label="Campaign" min-width="240" fixed="left" />
-
-  <!-- 中间列：正常滚动 -->
-  <el-table-column prop="state"    label="State"    width="120" />
-  <el-table-column prop="type"     label="Type"     width="80" />
-  <!-- ...更多列... -->
-
-  <!-- 右固定：Action 操作列 -->
-  <el-table-column label="" width="32" fixed="right" class-name="pcv-col-action">
-    <template #default>
-      <el-button link><el-icon><MoreFilled /></el-icon></el-button>
-    </template>
-  </el-table-column>
-</el-table>
-```
-
-### 14.5 CSS Override（需加入 el-overrides.css）
-
-> ⚠️ **关键陷阱：固定列背景必须是实色**  
-> 固定列的 hover / selected 背景若使用 `rgba` 半透明色，横向滚动时身后列的文字会直接穿透显示（文字重叠 bug）。  
-> **必须使用 `color-mix` 将 rgba 混入白色，得到等效实色。**
-
-```css
-/* ===== 固定列阴影 ===== */
-
-/* 左侧固定列：向右投射阴影（遮住滚动内容） */
-.el-table .el-table-fixed-column--left.is-last-column::after {
-  box-shadow: 10px 0 14px 0 rgba(0, 0, 0, 0.06);
-}
-
-/* 右侧固定列：向左投射阴影（遮住滚动内容） */
-.el-table .el-table-fixed-column--right.is-first-column::before {
-  box-shadow: -10px 0 14px 0 rgba(0, 0, 0, 0.06);
-}
-
-/* ===== 固定列背景：hover / selected 必须为实色 ===== */
-
-/*
-  ❌ 错误写法（半透明，滚动时文字透穿）：
-  .el-table__body tr:hover > td.el-table-fixed-column--left { background: rgba(2,83,182,0.04); }
-
-  ✅ 正确写法：color-mix 混入白色得到等效实色
-*/
+/* 固定列必须实色 */
 .el-table__body tr:hover > td.el-table-fixed-column--left,
 .el-table__body tr:hover > td.el-table-fixed-column--right {
   background: color-mix(in srgb, var(--pcv-brand) 4%, #ffffff);
 }
-
-.el-table__body tr.current-row > td.el-table-fixed-column--left,
 .el-table__body tr.el-table__row--selected > td.el-table-fixed-column--left,
-.el-table__body tr.current-row > td.el-table-fixed-column--right,
 .el-table__body tr.el-table__row--selected > td.el-table-fixed-column--right {
   background: color-mix(in srgb, var(--pcv-brand) 6%, #ffffff);
 }
 
-/* ===== 固定列默认背景继承（保持行 hover/selected 色一致）===== */
-.el-table .el-table__cell.el-table-fixed-column--left,
-.el-table .el-table__cell.el-table-fixed-column--right {
-  background: inherit;
-}
+/* 排序激活 */
+.el-table .ascending  .sort-caret.ascending  { border-bottom-color: var(--pcv-brand); }
+.el-table .descending .sort-caret.descending { border-top-color:    var(--pcv-brand); }
 
-/* Action 列 padding 清零，内容居中 */
-.el-table .pcv-col-action .cell {
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* 分隔线 */
+.el-table::before { background: #edeef1; }
 
-/* ⋮ 图标按钮 hover 颜色 */
-.el-table .pcv-col-action .el-button {
-  color: #b2b2b8;
-  transition: color .15s;
-}
-.el-table .pcv-col-action .el-button:hover {
-  color: var(--pcv-brand);
-}
-```
-
-> **纯 HTML/CSS 表格（非 el-table）的同等规则：**
-> ```css
-> /* border-collapse 必须设为 separate，否则 ::after 阴影被裁 */
-> table { border-collapse: separate; border-spacing: 0; }
->
-> /* 固定列 hover/selected 同理用 color-mix */
-> tbody tr:hover td.sticky-col {
->   background: color-mix(in srgb, var(--pcv-brand) 4%, #ffffff);
-> }
-> tbody tr.selected td.sticky-col {
->   background: color-mix(in srgb, var(--pcv-brand) 6%, #ffffff);
-> }
-> ```
-
-### 14.6 滚动条（Horizontal Scrollbar）
-
-- 位置：在表格水平滚动区内，**表头上方**（Figma 标注为独立 16px 高区域）
-- 高度：**16px**（thumb 高度 8px，居中）
-- Thumb 颜色：`#D2D4D9`
-- 背景色：`#FFFFFF`，`border-top: 1px solid #EDEEF1`，`border-bottom: 1px solid #EDEEF1`
-- EP 使用浏览器原生滚动条；需 CSS 美化：
-
-```css
-/* Pacvue 表格横向滚动条 */
-.el-table__body-wrapper::-webkit-scrollbar {
-  height: 8px;
-}
-.el-table__body-wrapper::-webkit-scrollbar-track {
-  background: #f5f5f5;
-  border-radius: 7px;
-}
-.el-table__body-wrapper::-webkit-scrollbar-thumb {
-  background: #d2d4d9;
-  border-radius: 7px;
-}
-.el-table__body-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #b2b4b9;
-}
+/* 横向滚动条 */
+.el-table__body-wrapper::-webkit-scrollbar       { height: 8px; }
+.el-table__body-wrapper::-webkit-scrollbar-thumb  { background: #d2d4d9; border-radius: 7px; }
+.el-table__body-wrapper::-webkit-scrollbar-track  { background: #f5f5f5; border-radius: 7px; }
 ```
 
 ---
 
-## 十五、使用规则摘要
+## 状态点颜色
 
-```
-完整表格布局（从上到下，各区域间无间距，左右各 24px 边距）：
-  筛选栏 Filter Bar（自适应）
-  → 操作栏 Toolbar（68px，border-top #EDEEF1）
-  → 滚动条（16px，列超宽时出现，在 Header 上方）
-  → 表头 Header（48px，白底）
-  → 数据行 Body（52px/行，hover+selected 显示品牌色背景）
-  → 汇总行 Total（52px，bold）
-  → 分页器 Pagination（64px，固定底部）
-
-Toolbar 左右原则：
-  左 = 数据操作（Create、Bulk Target、Bulk Op）
-  右 = 工具操作（show number、visibility、save、download、custom columns）
-  主按钮 bg: var(--pcv-brand)，次按钮 border: var(--pcv-brand)，批量禁用时灰色
-
-多选交互：
-  空框 → 点击 → 全选当前页 + 弹出菜单 (Select All Page / Select Current Page / Deselect All)
-  有选中 → Toolbar Bulk Op 按钮激活为品牌色
-
-分页显示逻辑：
-  数据量多时分页器出现；切换每页数量后数据≤该数量则分页器消失
-
-列宽：Name≥280px，数值列≥106px，操作列固定 32px
-
-固定列（列超宽时自动启用横向滚动）：
-  左固定 = Checkbox 列（44px）+ 第一内容列（≥240px），position sticky left
-  右固定 = Action 列（32px，⋮ 图标），position sticky right
-  左固定列右阴影：box-shadow 10px 0 14px 0 rgba(0,0,0,0.06)（仅未滚到左端时显示）
-  右固定列左阴影：box-shadow -10px 0 14px 0 rgba(0,0,0,0.06)（仅有滚动偏移时显示）
-
-横向滚动条：height 8px（thumb），color #D2D4D9，radius 7px
-
-状态点颜色：
-  Active(绿)  = #28C76F
-  Paused(灰)  = #82858B
-  Error(红)   = #EA5455
-  Warning(橙) = #FF9F43
-```
+| 状态 | 颜色 |
+|---|---|
+| Active | `#28C76F` |
+| Paused | `#82858B` |
+| Error | `#EA5455` |
+| Warning | `#FF9F43` |

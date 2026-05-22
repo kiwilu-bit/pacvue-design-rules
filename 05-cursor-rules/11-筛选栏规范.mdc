@@ -1,294 +1,72 @@
 ---
-description: Pacvue 筛选栏（Filter Bar）组件规范——布局结构、4列等宽 grid、条件框样式、Search/Clear 按钮行、CSS 实现与兼容性
+description: Pacvue 筛选栏（Filter Bar）AI 代码生成速查——布局规则、Search/Reset 位置判断、条件框样式、响应式列数。完整规范见 04-areas/filter-bar-area.md。
 globs: ["**/*.vue", "**/*.html", "**/*.css"]
 alwaysApply: false
 ---
 
-# 11 · 筛选栏规范（Filter Bar）
+# 11 · 筛选栏规范（Filter Bar）速查
 
-> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN`  
-> - 节点 `7347:114153`（表格筛选新版）  
-> - 节点 `11255:267108`（筛选栏实例）
-
----
-
-## 一、整体布局原则
-
-```
-┌─────────────────────────────────────────────────────────┐
-│ [Filters] [Custom] │ Cond 1      │ Cond 2  │ Cond 3    │ ← Row 1：4 列等宽
-│ Cond 4             │ Cond 5      │         │           │ ← Row 2：4 列等宽（空格不填）
-│                                    [Search] [Clear ⌫]  │ ← 最后行：右对齐，独占一行
-└─────────────────────────────────────────────────────────┘
-```
-
-### 1.1 核心规则（必须遵守）
-
-1. **条件区使用 4 列等宽 grid**，`gap: 16px`，撑满可用宽度
-2. **Search + Clear 独占最后一行，右对齐**（`align-items: flex-end`）
-3. 条件框高度固定 **36px**，宽度由 grid 等分（不写死像素）
-4. 条件框内部结构：`Label ｜ 分隔线 ｜ Value ↓`
-5. 各行之间 `gap: 16px`；筛选栏与操作栏 Toolbar 之间**无间距**
+> 完整规范（含图示、四种典型布局、HTML 模板）：`04-areas/filter-bar-area.md`  
+> 数据来源：Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN`
 
 ---
 
-## 二、CSS 实现
+## 核心规则
+
+1. 默认 **4 列等宽 grid**，`gap: 16px`，filter 最小宽度 **263px**
+2. **Search / Reset 位置判断**：
+   - 最后一行有空位 → **同行靠右**（`justify-content: space-between`）
+   - 最后一行已满 → **独占新行**（`justify-content: flex-end`）
+3. 条件框高度 **36px**，圆角 **4px**；Search/Reset 圆角 **6px**（不同！）
+4. 响应式：`repeat(auto-fill, minmax(263px, 1fr))`，超宽自动扩 5/6 列，无需 media query
+5. 筛选栏与 Toolbar 之间**无间距**
+
+---
+
+## 关键 CSS
 
 ```css
-/* ── 筛选栏外层容器 ── */
+/* 外层容器 */
 .filter-bar {
   padding: 16px 24px;
   border-bottom: 1px solid #edeef1;
-  background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;   /* 关键：让 Search/Clear 行右对齐 */
-  gap: 16px;
-}
-
-/* ── 筛选条件区域 ── */
-.filter-conditions {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* ── 每行：4 列等宽 ── */
+/* 条件行（响应式列数） */
 .filter-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  width: 100%;
-}
-
-/* ── Filters + Custom 按钮组（共占 1 格，内部均分）── */
-.filter-quick {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(263px, 1fr));
   gap: 16px;
 }
-```
 
----
-
-## 三、筛选条件框（Filter Condition）
-
-### 3.1 尺寸 & 样式
-
-```css
-.filter-cond {
-  height: 36px;
-  width: 100%;              /* 由 grid 等分控制 */
-  border: 1px solid #dedfe3;
-  border-radius: 4px;
+/* 最后行有空位：同行两端 */
+.filter-last-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  overflow: hidden;
-  background: #ffffff;
-  cursor: pointer;
-  transition: border-color .15s;
+  gap: 16px;
 }
-.filter-cond:hover { border-color: var(--pcv-brand); }
-```
 
-### 3.2 内部结构（Label | 分隔线 | Value ↓）
-
-```
-[Label  Medium #45464F][1px #DEDFE3 h:16px][Value Regular #66666C][↓ 20×20px #DEDFE3]
- padding:0 12px         flex-shrink:0        flex:1 min-width:0     padding-right:10px
-```
-
-| 区域 | 字色 | 字重 | 说明 |
-|---|---|---|---|
-| **Label** | `#45464F` | Medium 500 | 字段名，不换行，`flex-shrink: 0` |
-| **分隔线** | `#DEDFE3` | — | `width: 1px; height: 16px` |
-| **Value（有值）** | `#66666C` | Regular 400 | 已选值 |
-| **Value（空/占位）** | `#B2B2B8` | Regular 400 | 未选时占位 |
-| **Value（激活态）** | `var(--pcv-brand)` | Medium 500 | 有激活筛选时 |
-| **↓ 箭头** | `#DEDFE3` / hover `var(--pcv-brand)` | — | `20×20px` Pacvue 自定义图标 |
-
-### 3.3 特殊条件类型
-
-| 类型 | 处理方式 |
-|---|---|
-| **文本搜索**（text input）| 将 Value 区替换为 `<input>`，无下拉箭头 |
-| **日期范围**（date range）| Value 区显示日历图标 + 日期文字（或占位文字）|
-| **宽条件**（占 2 格）| `grid-column: span 2`（如 Campaign Name 含操作符） |
-
----
-
-## 四、Filters / Custom 按钮
-
-```css
-.btn-filter {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--pcv-brand);
-  border-radius: 4px;
-  background: #ffffff;
-  color: var(--pcv-brand);
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-}
-.btn-filter:hover { background: rgba(var(--pcv-brand-rgb), .06); }
-```
-
-- 图标：20×20px，`stroke: currentColor`
-
----
-
-## 五、Search & Clear 按钮行
-
-```css
-/* 行容器（filter-bar align-items:flex-end 已自动右对齐） */
+/* 最后行已满：Search/Reset 独占行靠右 */
 .filter-actions {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 16px;
 }
-
-/* Search 主按钮 */
-.btn-search {
-  height: 36px;
-  padding: 0 20px;
-  background: var(--pcv-brand);
-  border: 1px solid var(--pcv-brand);
-  border-radius: 6px;          /* 注意：比条件框多 2px，Figma 实测 */
-  color: #fbfbfb;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-.btn-search:hover { opacity: .88; }
-
-/* Clear/Reset 图标按钮 */
-.btn-clear {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #dedfe3;
-  border-radius: 6px;          /* 同 Search，6px */
-  background: #ffffff;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.btn-clear:hover { border-color: var(--pcv-brand); color: var(--pcv-brand); }
-```
-
-> ⚠️ **Search 和 Clear 圆角为 6px（radius-md），与条件框的 4px（radius-sm）不同，来自 Figma 实测。**
-
----
-
-## 六、兼容性规则（响应式）
-
-### 6.1 宽度适配
-
-| 视口宽度 | 可用宽度（减去 62px 侧边栏 + 48px padding）| 每列约宽 |
-|---|---|---|
-| 1280px | 1280 - 62 - 48 = **1170px** | (1170 - 3×16) / 4 ≈ **280px** |
-| 1440px | 1440 - 62 - 48 = **1330px** | (1330 - 3×16) / 4 ≈ **320px** |
-| 1920px | 1920 - 62 - 48 = **1810px** | (1810 - 3×16) / 4 ≈ **440px** |
-
-- `grid-template-columns: repeat(4, 1fr)` 自动适配，无需 media query
-- **严禁**给条件框写死像素宽度（如 `width: 254px`），会破坏等宽布局
-
-### 6.2 防溢出
-
-```css
-/* 主内容区防止 table 撑宽整个页面 */
-.main-area {
-  min-width: 0;
-  max-width: calc(100vw - 62px);
-  overflow-x: hidden;
-}
-
-/* 筛选栏本身不限高，随条件行数自动增高 */
-```
-
-### 6.3 条件行数
-
-- **≤ 4 个条件**：1 行（含 Filters+Custom 按钮组共占 1 格）
-- **5~8 个条件**：2 行
-- **每行空余格**：grid 自动留空，**不需要填充空占位**
-
----
-
-## 七、完整 HTML 模板
-
-```html
-<!-- Filter Bar: flex-col, align-items-end -->
-<div class="filter-bar">
-
-  <!-- 筛选条件区 -->
-  <div class="filter-conditions">
-
-    <!-- Row 1: [Filters+Custom] [Cond] [Cond] [Cond] -->
-    <div class="filter-row">
-      <!-- Filters + Custom 共占 1 格 -->
-      <div class="filter-quick">
-        <button class="btn-filter">Filters</button>
-        <button class="btn-filter">Custom</button>
-      </div>
-
-      <!-- 普通单选/多选条件 -->
-      <div class="filter-cond">
-        <span class="filter-cond-label">Vendor</span>
-        <span class="filter-divider"></span>
-        <span class="filter-cond-value has-value">Dial Corporation</span>
-        <span class="filter-arrow">↓</span>
-      </div>
-
-      <!-- 文本搜索条件 -->
-      <div class="filter-cond">
-        <span class="filter-cond-label">Name</span>
-        <span class="filter-divider"></span>
-        <input class="filter-text-input" placeholder="Search..." />
-      </div>
-
-      <!-- 日期范围条件 -->
-      <div class="filter-cond">
-        <span class="filter-cond-label">Date</span>
-        <span class="filter-divider"></span>
-        <span class="filter-date-value">📅 Select range</span>
-        <span class="filter-arrow">↓</span>
-      </div>
-    </div><!-- /Row 1 -->
-
-    <!-- Row 2（如有更多条件） -->
-    <div class="filter-row">
-      <div class="filter-cond">...</div>
-      <!-- 空格自动由 grid 填充，无需占位 div -->
-    </div>
-
-  </div><!-- /.filter-conditions -->
-
-  <!-- Search + Clear：独占最后一行，align-items:flex-end 自动右对齐 -->
-  <div class="filter-actions">
-    <button class="btn-search">🔍 Search</button>
-    <button class="btn-clear">⌫</button>
-  </div>
-
-</div>
 ```
 
 ---
 
-## 八、与旧版 Filter Bar 对比
+## 条件框速查
 
-| 属性 | 旧版（错误）| 新版（规范）|
-|---|---|---|
-| 条件布局 | `flex-wrap: wrap` + 固定 `min-width` | **`grid repeat(4, 1fr)`** |
-| 条件宽度 | 固定像素（220px/180px/260px）| **等宽（1fr）** |
-| Search 位置 | 同行最右侧 | **独占最后一行，右对齐** |
-| Search 圆角 | 4px | **6px（radius-md）** |
-| 内部分隔线 | 无 | **1px #DEDFE3 height 16px** |
-| 防溢出 | 无 | `min-width: 0` + `overflow-x: hidden` |
+| 元素 | 值 |
+|---|---|
+| 高度 | 36px |
+| 边框 | `1px solid #DEDFE3`，hover → `var(--pcv-brand)` |
+| 圆角 | 4px |
+| 内部结构 | `Label（Medium #45464F）｜ 1px 分隔线 ｜ Value ｜ ↓ 20px` |
+| Search 按钮圆角 | **6px**（与条件框不同） |
+| Reset 按钮 | `36×36px`，圆角 **6px** |
