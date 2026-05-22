@@ -1,4 +1,4 @@
-# Design Tokens — Pacvue Design System test
+# Design Tokens — Pacvue Design System
 
 > Source: Pacvue Design System Figma `wgvYWGdj9Bfq2HSEpRbnLN`
 
