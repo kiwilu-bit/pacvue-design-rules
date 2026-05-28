@@ -34,7 +34,8 @@ pacvue-design-rules/
 │   ├── select.md                 ← Select: trigger states, dropdown panel, multi-select
 │   ├── dropdown.md               ← Dropdown menu: 3 trigger types, item states, dividers
 │   ├── date-picker.md            ← Date picker: trigger, panel, day states, range selection
-│   └── checkbox.md               ← Checkbox: 7 states, table header logic, bulk selection
+│   ├── checkbox.md               ← Checkbox: 7 states, table header logic, bulk selection
+│   └── tooltip.md                ← Tooltip: hover/focus trigger, short text only, no actions
 │
 └── 04-form-rules/
     └── special-components.md     ← Dynamic lists, OR groups, condition rows, column picker
@@ -170,5 +171,5 @@ When adding new rules:
 ## Related Projects
 
 - **Pacvue Design System Figma** — `wgvYWGdj9Bfq2HSEpRbnLN`
-- **Cursor Rules** (`.cursor/rules/`) — auto-applied rules in the development workspace
+- **Cursor Rules** (`.cursor/rules/`) — auto-applied rules in the development workspace. Install Tooltip rule into a Vue app: `./scripts/install-cursor-rules.sh /path/to/vue-app` (see `05-cursor-rules/README.md`)
 - **Cursor Skills** — higher-level AI skill packs for page generation

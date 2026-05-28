@@ -14,6 +14,7 @@ These files can be placed in `.cursor/rules/` in any project to have AI agents a
 | `10-表格规范.mdc` | Table component full spec | On demand |
 | `11-筛选栏规范.mdc` | Filter bar spec | On demand |
 | `12-分页器规范.mdc` | Pagination spec | On demand |
+| `14-悬浮提示规范.mdc` | Tooltip interaction & visual spec | On demand |
 | `表单规则/01-定义与对齐.mdc` | Form definitions & alignment | ✅ Always |
 | `表单规则/02-间距规范.mdc` | Form spacing | ✅ Always |
 | `表单规则/03-容器类型.mdc` | Container types | ✅ Always |
@@ -28,13 +29,33 @@ These files can be placed in `.cursor/rules/` in any project to have AI agents a
 
 ## How to Use in a New Project
 
-Copy the relevant files to your project:
+### Recommended: install script (Tooltip)
+
+From this repo root:
 
 ```bash
-# Copy all rules
-cp -r 05-cursor-rules/ your-project/.cursor/rules/
+chmod +x scripts/install-cursor-rules.sh
+./scripts/install-cursor-rules.sh /path/to/your-vue-app
+```
 
-# Or just copy the always-applied ones
+This copies `14-悬浮提示规范.mdc` into `your-vue-app/.cursor/rules/`. Cursor applies it when editing `**/*.vue`, `**/*.html`, or `**/*.css`.
+
+Install **all** rules (including `表单规则/`, `页面模版/`):
+
+```bash
+./scripts/install-cursor-rules.sh --all /path/to/your-vue-app
+```
+
+### Manual copy
+
+```bash
+# Tooltip only
+cp 05-cursor-rules/14-悬浮提示规范.mdc your-project/.cursor/rules/
+
+# Copy all rules
+cp -r 05-cursor-rules/* your-project/.cursor/rules/
+
+# Or just the always-applied ones
 cp 05-cursor-rules/pacvue-design-system.mdc your-project/.cursor/rules/
 cp 05-cursor-rules/pacvue-form-template.mdc your-project/.cursor/rules/
 cp 05-cursor-rules/pacvue-create-page-template.mdc your-project/.cursor/rules/
